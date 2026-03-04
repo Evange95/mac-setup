@@ -106,7 +106,7 @@ cask "alfred"
 cask "1password"
 cask "rectangle"         # Window management
 cask "caffeine"          # Prevent sleep
-cask "hidden-bar"        # Menu bar management
+cask "hiddenbar"         # Menu bar management
 
 # Security
 cask "lulu"              # Outbound firewall
