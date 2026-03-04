@@ -28,6 +28,8 @@ brew "lazygit"          # Git TUI
 brew "git-delta"        # Syntax-highlighted diff pager
 brew "tldr"             # Simplified man pages
 brew "direnv"           # Per-directory env
+brew "starship"         # Cross-shell prompt
+brew "zoxide"           # Smarter cd (z replacement)
 brew "btop"             # Resource monitor
 brew "tree"             # Directory tree
 brew "watch"            # Execute commands periodically

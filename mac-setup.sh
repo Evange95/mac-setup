@@ -199,13 +199,31 @@ if [[ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]]; then
     git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
 fi
 
-if [[ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]]; then
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
+# fast-syntax-highlighting (replaces zsh-syntax-highlighting — faster, better command highlighting)
+if [[ ! -d "$ZSH_CUSTOM/plugins/fast-syntax-highlighting" ]]; then
+    git clone https://github.com/zdharma-continuum/fast-syntax-highlighting "$ZSH_CUSTOM/plugins/fast-syntax-highlighting"
 fi
 
-# Powerlevel10k theme
-if [[ ! -d "$ZSH_CUSTOM/themes/powerlevel10k" ]]; then
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$ZSH_CUSTOM/themes/powerlevel10k"
+# zsh-completions (completion definitions for hundreds of tools)
+if [[ ! -d "$ZSH_CUSTOM/plugins/zsh-completions" ]]; then
+    git clone https://github.com/zsh-users/zsh-completions "$ZSH_CUSTOM/plugins/zsh-completions"
+fi
+
+# zsh-you-should-use (reminds you about existing aliases)
+if [[ ! -d "$ZSH_CUSTOM/plugins/you-should-use" ]]; then
+    git clone https://github.com/MichaelAquilina/zsh-you-should-use "$ZSH_CUSTOM/plugins/you-should-use"
+fi
+
+# Remove old zsh-syntax-highlighting if present (replaced by fast-syntax-highlighting)
+if [[ -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]]; then
+    rm -rf "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
+    log_info "Removed old zsh-syntax-highlighting (replaced by fast-syntax-highlighting)"
+fi
+
+# Remove Powerlevel10k if present (replaced by Starship)
+if [[ -d "$ZSH_CUSTOM/themes/powerlevel10k" ]]; then
+    rm -rf "$ZSH_CUSTOM/themes/powerlevel10k"
+    log_info "Removed Powerlevel10k (replaced by Starship)"
 fi
 
 #===============================================================================
@@ -227,7 +245,21 @@ if [[ -f "$SCRIPT_DIR/iterm2-profile.json" ]]; then
 fi
 
 #===============================================================================
-# SECTION 8: Dotfiles (.zshrc)
+# SECTION 8: Starship Prompt Configuration
+#===============================================================================
+log_info "Setting up Starship prompt..."
+
+mkdir -p "$HOME/.config"
+if [[ -f "$SCRIPT_DIR/starship.toml" ]]; then
+    cp "$SCRIPT_DIR/starship.toml" "$HOME/.config/starship.toml"
+    log_success "Starship config deployed"
+fi
+
+# Clean up old Powerlevel10k config
+rm -f "$HOME/.p10k.zsh"
+
+#===============================================================================
+# SECTION 9: Dotfiles (.zshrc)
 #===============================================================================
 log_info "Creating dotfiles..."
 
@@ -243,17 +275,30 @@ cat > "$HOME/.zshrc" << 'ZSHRC'
 # Zsh Configuration
 #===============================================================================
 
+# --- Oh My Zsh Performance ---
+DISABLE_AUTO_UPDATE="true"       # Update manually with omz update
+DISABLE_MAGIC_FUNCTIONS="true"   # Faster paste (no URL escaping)
+DISABLE_COMPFIX="true"           # Skip compaudit (saves ~20ms)
+
 # Path to Oh My Zsh
 export ZSH="$HOME/.oh-my-zsh"
 
-# Theme
-ZSH_THEME="powerlevel10k/powerlevel10k"
+# No theme — using Starship prompt (initialized at bottom)
+ZSH_THEME=""
+
+# Load zsh-completions before compinit (must come before OMZ source)
+fpath=(${ZSH_CUSTOM:-$ZSH/custom}/plugins/zsh-completions/src $fpath)
+
+# Deduplicate fpath to prevent compinit cache invalidation
+fpath=(${(uo)fpath})
 
 # Plugins
 plugins=(
     git
+    sudo
     zsh-autosuggestions
-    zsh-syntax-highlighting
+    fast-syntax-highlighting
+    you-should-use
     docker
     kubectl
     golang
@@ -266,6 +311,61 @@ plugins=(
 )
 
 source $ZSH/oh-my-zsh.sh
+
+#===============================================================================
+# Shell Options
+#===============================================================================
+
+setopt AUTO_CD                   # Type directory name to cd into it
+setopt CORRECT                   # Suggest corrections for mistyped commands
+
+#===============================================================================
+# History
+#===============================================================================
+
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=100000
+SAVEHIST=100000
+
+setopt EXTENDED_HISTORY          # Save timestamp and duration
+setopt HIST_EXPIRE_DUPS_FIRST    # Expire duplicates first when trimming
+setopt HIST_IGNORE_ALL_DUPS      # Remove older duplicate entries
+setopt HIST_SAVE_NO_DUPS         # Don't write duplicates to file
+setopt HIST_FIND_NO_DUPS         # Don't show duplicates when searching
+setopt HIST_IGNORE_SPACE         # Prefix with space to exclude from history
+setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks
+setopt INC_APPEND_HISTORY_TIME   # Append with duration after command finishes
+setopt SHARE_HISTORY             # Share history between sessions
+
+#===============================================================================
+# Completion
+#===============================================================================
+
+# Enable completion caching
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "$HOME/.zcompcache"
+
+# Menu-driven completion
+zstyle ':completion:*' menu select
+
+# Case-insensitive, partial-word, and substring completion
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+
+# Group completions by type
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*:descriptions' format '%F{yellow}-- %d --%f'
+
+# Complete . and .. special directories
+zstyle ':completion:*' special-dirs true
+
+#===============================================================================
+# Key Bindings
+#===============================================================================
+
+# Edit current command in $EDITOR (Ctrl+X Ctrl+E)
+autoload -U edit-command-line
+zle -N edit-command-line
+bindkey '^X^E' edit-command-line
 
 #===============================================================================
 # Environment Variables
@@ -310,8 +410,9 @@ eval "$(pyenv virtualenv-init -)" 2>/dev/null || true
 # pipx
 export PATH="$HOME/.local/bin:$PATH"
 
-# direnv
+# direnv (must be last hook — after all PATH changes)
 eval "$(direnv hook zsh)"
+export DIRENV_LOG_FORMAT=""  # Silence loading/unloading messages
 
 #===============================================================================
 # Aliases
@@ -427,13 +528,16 @@ export FZF_DEFAULT_OPTS='
 # iTerm2 shell integration
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
-# Powerlevel10k
-[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+# zoxide (smarter cd — replaces z/autojump)
+eval "$(zoxide init zsh)"
+
+# Starship prompt (must be last)
+eval "$(starship init zsh)"
 
 ZSHRC
 
 #===============================================================================
-# SECTION 9: VS Code & Cursor Extensions
+# SECTION 10: VS Code & Cursor Extensions
 #===============================================================================
 log_info "Installing editor extensions..."
 
@@ -458,7 +562,7 @@ if [[ -f "$SCRIPT_DIR/vscode-extensions.txt" ]]; then
 fi
 
 #===============================================================================
-# SECTION 10: Git Configuration
+# SECTION 11: Git Configuration
 #===============================================================================
 log_info "Configuring Git..."
 
@@ -621,7 +725,7 @@ git config --global core.excludesfile "$HOME/.gitignore_global"
 log_success "Git configured with delta, 30+ settings, and power-user aliases"
 
 #===============================================================================
-# SECTION 11: SSH Key Generation & Signing
+# SECTION 12: SSH Key Generation & Signing
 #===============================================================================
 log_info "Setting up SSH..."
 
@@ -684,7 +788,7 @@ if [[ -f "$SSH_KEY.pub" ]]; then
 fi
 
 #===============================================================================
-# SECTION 12: macOS Security Hardening
+# SECTION 13: macOS Security Hardening
 #===============================================================================
 log_info "Configuring macOS security settings..."
 
@@ -770,7 +874,7 @@ log_success "Personalized ads and Siri analytics disabled"
 npm config set audit-level moderate 2>/dev/null || true
 
 #===============================================================================
-# SECTION 13: Directory Structure
+# SECTION 14: Directory Structure
 #===============================================================================
 log_info "Creating project directory structure..."
 
@@ -782,7 +886,7 @@ mkdir -p "$HOME/Code/open-source"
 log_success "Created ~/Code directory structure"
 
 #===============================================================================
-# SECTION 14: macOS Preferences
+# SECTION 15: macOS Preferences
 #===============================================================================
 log_info "Configuring macOS preferences..."
 
@@ -829,7 +933,7 @@ killall Finder 2>/dev/null || true
 killall Dock 2>/dev/null || true
 
 #===============================================================================
-# SECTION 15: FZF Installation
+# SECTION 16: FZF Installation
 #===============================================================================
 log_info "Setting up FZF key bindings..."
 FZF_INSTALL="$(brew --prefix)/opt/fzf/install"
@@ -840,7 +944,7 @@ else
 fi
 
 #===============================================================================
-# SECTION 16: Start Colima (Optimized for Apple Silicon)
+# SECTION 17: Start Colima (Optimized for Apple Silicon)
 #===============================================================================
 log_info "Starting Colima (Docker runtime)..."
 
@@ -860,13 +964,13 @@ else
 fi
 
 #===============================================================================
-# SECTION 17: Post-Install Verification
+# SECTION 18: Post-Install Verification
 #===============================================================================
 echo ""
 log_info "Verifying installations..."
 echo ""
 
-VERIFY_TOOLS=(git node go rustc python3 docker kubectl helm bun pnpm delta code cursor claude)
+VERIFY_TOOLS=(git node go rustc python3 docker kubectl helm bun pnpm delta starship zoxide code cursor claude)
 PASS=0
 FAIL=0
 
@@ -899,7 +1003,7 @@ echo "Next Steps:"
 echo ""
 echo "  1. Restart your terminal or run: source ~/.zshrc"
 echo ""
-echo "  2. Configure Powerlevel10k theme: p10k configure"
+echo "  2. Starship prompt is ready. Edit ~/.config/starship.toml to customize."
 echo ""
 echo "  3. Add your SSH key to GitHub:"
 echo "     cat ~/.ssh/id_ed25519.pub | pbcopy"
