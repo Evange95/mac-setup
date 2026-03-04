@@ -1,0 +1,8 @@
+# =============================================================================
+# Mac Setup Configuration
+# Copy this file to setup.conf and fill in your details:
+#   cp setup.conf.example setup.conf
+# =============================================================================
+
+GIT_USER_NAME="Your Name"
+GIT_USER_EMAIL="your@email.com"
