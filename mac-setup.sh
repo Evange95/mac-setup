@@ -80,10 +80,7 @@ if command -v brew &>/dev/null; then
 else
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-    # Persist Homebrew in login shell for Apple Silicon
-    if [[ $(uname -m) == "arm64" ]]; then
-        echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
-    fi
+    # Homebrew PATH is set statically in .zshenv (created in Section 9)
 fi
 
 # Always set up brew in PATH for this session (both architectures)
@@ -181,18 +178,18 @@ pipx install ruff
 pipx install mypy
 
 #===============================================================================
-# SECTION 6: Oh My Zsh & Terminal Setup
+# SECTION 6: Zsh Plugins
 #===============================================================================
-log_info "Setting up Zsh and Oh My Zsh..."
+log_info "Setting up Zsh plugins..."
 
-# Install Oh My Zsh
+# Install Oh My Zsh (used only as a plugin directory — not loaded as a framework)
 if [[ -d "$HOME/.oh-my-zsh" ]]; then
-    log_success "Oh My Zsh already installed"
+    log_success "Oh My Zsh directory already exists"
 else
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 fi
 
-# Install Zsh plugins (via Oh My Zsh only — not Homebrew, to avoid double-install)
+# Install Zsh plugins into OMZ custom dir (sourced directly, not via OMZ framework)
 ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
 
 if [[ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]]; then
@@ -259,65 +256,109 @@ fi
 rm -f "$HOME/.p10k.zsh"
 
 #===============================================================================
-# SECTION 9: Dotfiles (.zshrc)
+# SECTION 9: Dotfiles (.zshenv + .zshrc)
 #===============================================================================
 log_info "Creating dotfiles..."
 
+# --- .zshenv (static PATH, no subprocesses) ---
+cat > "$HOME/.zshenv" << 'ZSHENV'
+# === Zsh Environment (runs for ALL zsh invocations — keep minimal) ===
+
+# Homebrew (static — only changes if Homebrew moves)
+export HOMEBREW_PREFIX="/opt/homebrew"
+export HOMEBREW_CELLAR="/opt/homebrew/Cellar"
+export HOMEBREW_REPOSITORY="/opt/homebrew"
+export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}"
+
+# Tool homes
+export VOLTA_HOME="$HOME/.volta"
+export GOPATH="$HOME/go"
+export BUN_INSTALL="$HOME/.bun"
+export PYENV_ROOT="$HOME/.pyenv"
+
+# PATH (single assignment, no subprocesses)
+path=(
+    $HOME/.local/bin            # pipx
+    $BUN_INSTALL/bin            # bun
+    $VOLTA_HOME/bin             # volta/node
+    $GOPATH/bin                 # go binaries
+    $HOME/.cargo/bin            # rust/cargo
+    $PYENV_ROOT/bin             # pyenv binary
+    $HOMEBREW_PREFIX/bin        # homebrew
+    $HOMEBREW_PREFIX/sbin       # homebrew sbin
+    $path                       # system defaults
+)
+typeset -U path
+ZSHENV
+
+log_success ".zshenv created (static PATH)"
+
+# --- .zprofile (cleanup — PATH is in .zshenv now) ---
+cat > "$HOME/.zprofile" << 'ZPROFILE'
+# PATH and environment setup is in ~/.zshenv
+ZPROFILE
+
+# --- .zshrc ---
 if [[ -f "$HOME/.zshrc" ]]; then
     log_warning ".zshrc already exists. Creating backup and regenerating."
     log_info "If you have custom changes, restore from backup after reviewing."
     cp "$HOME/.zshrc" "$HOME/.zshrc.backup.$(date +%Y%m%d%H%M%S)"
 fi
 
-# Create .zshrc
 cat > "$HOME/.zshrc" << 'ZSHRC'
 #===============================================================================
-# Zsh Configuration
+# Zsh Configuration — No Oh My Zsh, maximum performance
 #===============================================================================
 
-# --- Oh My Zsh Performance ---
-DISABLE_AUTO_UPDATE="true"       # Update manually with omz update
-DISABLE_MAGIC_FUNCTIONS="true"   # Faster paste (no URL escaping)
-DISABLE_COMPFIX="true"           # Skip compaudit (saves ~20ms)
+# Uncomment to profile: run `zprof` after shell loads
+# zmodload zsh/zprof
 
-# Path to Oh My Zsh
-export ZSH="$HOME/.oh-my-zsh"
+#===============================================================================
+# Completion System
+#===============================================================================
 
-# No theme — using Starship prompt (initialized at bottom)
-ZSH_THEME=""
-
-# Load zsh-completions before compinit (must come before OMZ source)
-fpath=(${ZSH_CUSTOM:-$ZSH/custom}/plugins/zsh-completions/src $fpath)
-
-# Deduplicate fpath to prevent compinit cache invalidation
-fpath=(${(uo)fpath})
-
-# Plugins
-plugins=(
-    git
-    sudo
-    zsh-autosuggestions
-    fast-syntax-highlighting
-    you-should-use
-    docker
-    kubectl
-    golang
-    rust
-    python
-    node
-    npm
-    fzf
-    direnv
+# fpath: Homebrew completions + zsh-completions plugin
+fpath=(
+    /opt/homebrew/share/zsh/site-functions
+    ${HOME}/.oh-my-zsh/custom/plugins/zsh-completions/src
+    $fpath
 )
+typeset -U fpath
 
-source $ZSH/oh-my-zsh.sh
+# compinit: only regenerate dump once per day
+autoload -Uz compinit
+ZSH_COMPDUMP="${ZDOTDIR:-$HOME}/.zcompdump"
+if [[ -f "$ZSH_COMPDUMP" && $(date +'%j') == $(stat -f '%Sm' -t '%j' "$ZSH_COMPDUMP" 2>/dev/null) ]]; then
+    compinit -C -d "$ZSH_COMPDUMP"
+else
+    compinit -d "$ZSH_COMPDUMP"
+    touch "$ZSH_COMPDUMP"
+fi
+
+# Compile zcompdump in background if stale
+{
+    if [[ -s "$ZSH_COMPDUMP" && (! -s "${ZSH_COMPDUMP}.zwc" || "$ZSH_COMPDUMP" -nt "${ZSH_COMPDUMP}.zwc") ]]; then
+        zcompile "$ZSH_COMPDUMP"
+    fi
+} &!
+
+#===============================================================================
+# Completion Styles
+#===============================================================================
+
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "$HOME/.zcompcache"
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*:descriptions' format '%F{yellow}-- %d --%f'
+zstyle ':completion:*' special-dirs true
 
 #===============================================================================
 # Shell Options
 #===============================================================================
 
-setopt AUTO_CD                   # Type directory name to cd into it
-setopt CORRECT                   # Suggest corrections for mistyped commands
+setopt AUTO_CD CORRECT
 
 #===============================================================================
 # History
@@ -326,93 +367,109 @@ setopt CORRECT                   # Suggest corrections for mistyped commands
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=100000
 SAVEHIST=100000
-
-setopt EXTENDED_HISTORY          # Save timestamp and duration
-setopt HIST_EXPIRE_DUPS_FIRST    # Expire duplicates first when trimming
-setopt HIST_IGNORE_ALL_DUPS      # Remove older duplicate entries
-setopt HIST_SAVE_NO_DUPS         # Don't write duplicates to file
-setopt HIST_FIND_NO_DUPS         # Don't show duplicates when searching
-setopt HIST_IGNORE_SPACE         # Prefix with space to exclude from history
-setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks
-setopt INC_APPEND_HISTORY_TIME   # Append with duration after command finishes
-setopt SHARE_HISTORY             # Share history between sessions
-
-#===============================================================================
-# Completion
-#===============================================================================
-
-# Enable completion caching
-zstyle ':completion:*' use-cache on
-zstyle ':completion:*' cache-path "$HOME/.zcompcache"
-
-# Menu-driven completion
-zstyle ':completion:*' menu select
-
-# Case-insensitive, partial-word, and substring completion
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
-
-# Group completions by type
-zstyle ':completion:*' group-name ''
-zstyle ':completion:*:descriptions' format '%F{yellow}-- %d --%f'
-
-# Complete . and .. special directories
-zstyle ':completion:*' special-dirs true
+setopt EXTENDED_HISTORY HIST_EXPIRE_DUPS_FIRST HIST_IGNORE_ALL_DUPS
+setopt HIST_SAVE_NO_DUPS HIST_FIND_NO_DUPS HIST_IGNORE_SPACE
+setopt HIST_REDUCE_BLANKS INC_APPEND_HISTORY_TIME SHARE_HISTORY
 
 #===============================================================================
 # Key Bindings
 #===============================================================================
 
-# Edit current command in $EDITOR (Ctrl+X Ctrl+E)
+# Edit command line in $EDITOR (Ctrl+X Ctrl+E)
 autoload -U edit-command-line
 zle -N edit-command-line
 bindkey '^X^E' edit-command-line
 
+# sudo: double-Esc to toggle sudo prefix (replaces OMZ sudo plugin)
+sudo-command-line() {
+    [[ -z $BUFFER ]] && LBUFFER="$(fc -ln -1)"
+    if [[ "$BUFFER" == sudo\ * ]]; then
+        LBUFFER="${LBUFFER#sudo }"
+    else
+        LBUFFER="sudo $LBUFFER"
+    fi
+}
+zle -N sudo-command-line
+bindkey '\e\e' sudo-command-line
+
 #===============================================================================
-# Environment Variables
+# Environment
 #===============================================================================
 
-# Locale
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
-
-# Editor
 export EDITOR="code --wait"
 export VISUAL="$EDITOR"
+export DIRENV_LOG_FORMAT=""
 
-# Homebrew
-if [[ $(uname -m) == "arm64" ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-else
-    eval "$(/usr/local/bin/brew shellenv)"
+#===============================================================================
+# pyenv (lazy-loaded — saves ~270ms startup)
+#===============================================================================
+
+if (( $+commands[pyenv] )); then
+    _pyenv_lazy_init() {
+        unfunction python python3 pip pip3 pyenv 2>/dev/null
+        eval "$(pyenv init -)"
+        eval "$(pyenv virtualenv-init -)" 2>/dev/null
+    }
+    for _cmd in python python3 pip pip3 pyenv; do
+        eval "${_cmd}() { _pyenv_lazy_init && ${_cmd} \"\$@\" }"
+    done
+    unset _cmd
 fi
 
-# Go
-export GOPATH="$HOME/go"
-export PATH="$GOPATH/bin:$PATH"
+#===============================================================================
+# FZF
+#===============================================================================
 
-# Rust
-source "$HOME/.cargo/env" 2>/dev/null || true
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+export FZF_DEFAULT_OPTS='
+  --height 40%
+  --layout=reverse
+  --border
+  --preview "bat --style=numbers --color=always --line-range :500 {}"
+'
 
-# Volta (Node.js)
-export VOLTA_HOME="$HOME/.volta"
-export PATH="$VOLTA_HOME/bin:$PATH"
+# Cache fzf shell integration (regenerates when fzf binary updates)
+_fzf_cache="${HOME}/.cache/fzf-zsh.zsh"
+if [[ ! -f "$_fzf_cache" || /opt/homebrew/bin/fzf -nt "$_fzf_cache" ]]; then
+    mkdir -p "${_fzf_cache:h}"
+    fzf --zsh > "$_fzf_cache"
+fi
+source "$_fzf_cache"
+unset _fzf_cache
 
-# Bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
+#===============================================================================
+# direnv (inlined hook — no subprocess)
+#===============================================================================
 
-# pyenv
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)" 2>/dev/null || true
+_direnv_hook() {
+    trap -- '' SIGINT
+    eval "$("/opt/homebrew/bin/direnv" export zsh)"
+    trap - SIGINT
+}
+typeset -ag precmd_functions
+if (( ! ${precmd_functions[(I)_direnv_hook]} )); then
+    precmd_functions=(_direnv_hook $precmd_functions)
+fi
+typeset -ag chpwd_functions
+if (( ! ${chpwd_functions[(I)_direnv_hook]} )); then
+    chpwd_functions=(_direnv_hook $chpwd_functions)
+fi
 
-# pipx
-export PATH="$HOME/.local/bin:$PATH"
+#===============================================================================
+# zoxide (cached init)
+#===============================================================================
 
-# direnv (must be last hook — after all PATH changes)
-eval "$(direnv hook zsh)"
-export DIRENV_LOG_FORMAT=""  # Silence loading/unloading messages
+_zoxide_cache="${HOME}/.cache/zoxide-init.zsh"
+if [[ ! -f "$_zoxide_cache" || /opt/homebrew/bin/zoxide -nt "$_zoxide_cache" ]]; then
+    mkdir -p "${_zoxide_cache:h}"
+    zoxide init zsh > "$_zoxide_cache"
+fi
+source "$_zoxide_cache"
+unset _zoxide_cache
 
 #===============================================================================
 # Aliases
@@ -458,7 +515,7 @@ alias nr="npm run"
 alias pn="pnpm"
 alias bx="bunx"
 
-# Monitoring (btop supersedes htop)
+# Monitoring
 alias htop="btop"
 
 # Utilities
@@ -470,71 +527,69 @@ alias update="brew update && brew upgrade && brew cleanup"
 
 # Quick edits
 alias zshrc="code ~/.zshrc"
-alias reload="source ~/.zshrc"
+alias reload="exec zsh"
 
 #===============================================================================
 # Functions
 #===============================================================================
 
-# Create directory and cd into it
-mkcd() {
-    mkdir -p "$1" && cd "$1"
-}
+mkcd() { mkdir -p "$1" && cd "$1" }
+killport() { lsof -ti:"$1" | xargs kill -9 }
+gcap() { git add -A && git commit -m "$1" && git push }
+dsh() { docker exec -it "$1" /bin/sh }
+kgetall() { kubectl get all -n "${1:-default}" }
 
-# Find and kill process on port
-killport() {
-    lsof -ti:"$1" | xargs kill -9
-}
-
-# Quick git commit and push
-gcap() {
-    git add -A && git commit -m "$1" && git push
-}
-
-# Docker shell into container
-dsh() {
-    docker exec -it "$1" /bin/sh
-}
-
-# Kubernetes get all in namespace
-kgetall() {
-    kubectl get all -n "${1:-default}"
+# pyclean (extracted from OMZ python plugin)
+pyclean() {
+    command find "${@:-.}" -type f -name "*.py[co]" -delete
+    command find "${@:-.}" -type d -name "__pycache__" -delete
+    command find "${@:-.}" -depth -type d -name ".mypy_cache" -exec rm -r "{}" +
+    command find "${@:-.}" -depth -type d -name ".pytest_cache" -exec rm -r "{}" +
 }
 
 #===============================================================================
-# FZF Configuration
+# Plugins (direct source — no framework overhead)
 #===============================================================================
 
-# Use fd for fzf
-export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+ZSH_CUSTOM="${HOME}/.oh-my-zsh/custom"
 
-# FZF options
-export FZF_DEFAULT_OPTS='
-  --height 40%
-  --layout=reverse
-  --border
-  --preview "bat --style=numbers --color=always --line-range :500 {}"
-'
+# you-should-use: remind about existing aliases
+source "$ZSH_CUSTOM/plugins/you-should-use/you-should-use.plugin.zsh"
 
-# Load fzf
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# zsh-autosuggestions: fish-like history suggestions
+source "$ZSH_CUSTOM/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
+
+# fast-syntax-highlighting (MUST be last plugin)
+source "$ZSH_CUSTOM/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh"
 
 #===============================================================================
-# Shell Integration & Extras
+# Shell Integration
 #===============================================================================
 
-# iTerm2 shell integration
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+# iTerm2 (only when running in iTerm)
+if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
+    test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+fi
 
-# zoxide (smarter cd — replaces z/autojump)
-eval "$(zoxide init zsh)"
+#===============================================================================
+# Starship Prompt (must be last — cached init)
+#===============================================================================
 
-# Starship prompt (must be last)
-eval "$(starship init zsh)"
+_starship_cache="${HOME}/.cache/starship-init.zsh"
+if [[ ! -f "$_starship_cache" || /opt/homebrew/bin/starship -nt "$_starship_cache" ]]; then
+    mkdir -p "${_starship_cache:h}"
+    starship init zsh > "$_starship_cache"
+fi
+source "$_starship_cache"
+unset _starship_cache
 
 ZSHRC
+
+# Clean up old files no longer needed
+rm -f "$HOME/.fzf.zsh"
+rm -f "$HOME/.zcompdump"*
+
+log_success "Dotfiles created (.zshenv, .zshrc)"
 
 #===============================================================================
 # SECTION 10: VS Code & Cursor Extensions
@@ -933,15 +988,11 @@ killall Finder 2>/dev/null || true
 killall Dock 2>/dev/null || true
 
 #===============================================================================
-# SECTION 16: FZF Installation
+# SECTION 16: FZF Cache Warm-up
 #===============================================================================
-log_info "Setting up FZF key bindings..."
-FZF_INSTALL="$(brew --prefix)/opt/fzf/install"
-if [[ -f "$FZF_INSTALL" ]]; then
-    "$FZF_INSTALL" --key-bindings --completion --no-update-rc --no-bash --no-fish
-else
-    log_warning "fzf install script not found; skipping key bindings setup"
-fi
+log_info "Pre-caching FZF shell integration..."
+mkdir -p "$HOME/.cache"
+fzf --zsh > "$HOME/.cache/fzf-zsh.zsh" 2>/dev/null && log_success "FZF cache created"
 
 #===============================================================================
 # SECTION 17: Start Colima (Optimized for Apple Silicon)
@@ -1001,7 +1052,7 @@ log_success "All tools and applications have been installed!"
 echo ""
 echo "Next Steps:"
 echo ""
-echo "  1. Restart your terminal or run: source ~/.zshrc"
+echo "  1. Restart your terminal (or run: exec zsh)"
 echo ""
 echo "  2. Starship prompt is ready. Edit ~/.config/starship.toml to customize."
 echo ""

@@ -1,15 +1,12 @@
 # =============================================================================
 # Starship Prompt Configuration
-# Docs: https://starship.rs/config/
 # =============================================================================
 
-# Timeout for commands executed by starship (ms)
-command_timeout = 1000
+# Fail fast — don't block the prompt waiting for slow git
+command_timeout = 500
 
-# Insert blank line between prompts
-add_newline = true
+add_newline = false
 
-# Prompt format
 format = """
 $directory\
 $git_branch\
@@ -43,23 +40,34 @@ style = "bold purple"
 [git_status]
 format = '([$all_status$ahead_behind]($style) )'
 style = "bold red"
+ignore_submodules = true
 
-# --- Languages (only show when relevant files detected) ---
+# --- Languages (detect by marker files only, not file extensions) ---
 [nodejs]
 format = "[$symbol($version)]($style) "
 symbol = "node "
+detect_extensions = []
+detect_files = ["package.json"]
+detect_folders = ["node_modules"]
 
 [python]
 format = "[$symbol($version)( \\($virtualenv\\))]($style) "
 symbol = "py "
+detect_extensions = []
+detect_files = ["pyproject.toml", "requirements.txt", "setup.py", "setup.cfg", "Pipfile", ".python-version"]
+detect_folders = [".venv", "venv"]
 
 [rust]
 format = "[$symbol($version)]($style) "
 symbol = "rs "
+detect_extensions = []
+detect_files = ["Cargo.toml"]
 
 [golang]
 format = "[$symbol($version)]($style) "
 symbol = "go "
+detect_extensions = []
+detect_files = ["go.mod"]
 
 # --- Infrastructure ---
 [docker_context]
@@ -71,6 +79,8 @@ only_with_files = true
 disabled = false
 format = "[$symbol$context( \\($namespace\\))]($style) "
 symbol = "k8s "
+detect_files = ["helmfile.yaml", "Chart.yaml"]
+detect_folders = ["k8s", "kubernetes", "helm", "charts"]
 
 # --- Command Duration ---
 [cmd_duration]
@@ -78,7 +88,7 @@ min_time = 3000
 format = "[$duration]($style) "
 style = "bold yellow"
 
-# --- Disabled modules (reduce noise) ---
+# --- Disabled modules ---
 [package]
 disabled = true
 
