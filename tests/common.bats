@@ -48,3 +48,15 @@ teardown() {
     [ "$status" -eq 0 ]
     [ "$(cat "$WORK/sub/dest")" = "managed" ]
 }
+
+@test "try keeps going and warns when the command fails" {
+    run try false
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"WARNING"*"false"* ]]
+}
+
+@test "try is silent when the command succeeds" {
+    run try true
+    [ "$status" -eq 0 ]
+    [ -z "$output" ]
+}

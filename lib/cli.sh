@@ -1,4 +1,4 @@
-# shellcheck shell=bash
+# shellcheck shell=bash disable=SC2034,SC2086  # vars are read by setup.sh; step lists are split on purpose
 # Argument parsing and step selection. Must stay bash 3.2 compatible (macOS /bin/bash).
 
 # Canonical execution order. Each name maps to steps/<name>.sh defining step_<name>.

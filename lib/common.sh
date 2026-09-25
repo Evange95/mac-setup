@@ -38,3 +38,20 @@ copy_file() {
     mkdir -p "$(dirname "$dest")"
     cp "$src" "$dest"
 }
+
+# Run a command whose failure should not abort the setup (e.g. admin-only settings on a managed Mac).
+try() {
+    "$@" || log_warning "Failed (continuing): $*"
+}
+
+# Make Homebrew, mise-managed tools and native installers visible to the current session.
+load_session_env() {
+    local brew_bin
+    for brew_bin in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+        if [[ -x "$brew_bin" ]]; then
+            eval "$("$brew_bin" shellenv)"
+            break
+        fi
+    done
+    export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
+}

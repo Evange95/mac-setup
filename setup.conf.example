@@ -4,5 +4,20 @@
 #   cp setup.conf.example setup.conf
 # =============================================================================
 
+# personal or work (work skips admin-only security settings and installs Brewfile.work)
+PROFILE="personal"
+
+# Default git identity
 GIT_USER_NAME="Your Name"
 GIT_USER_EMAIL="your@email.com"
+
+# Optional per-directory identities (via includeIf):
+#   repos under ~/Code/work/ commit as GIT_WORK_EMAIL,
+#   repos under ~/Code/personal/ commit as GIT_PERSONAL_EMAIL
+GIT_WORK_EMAIL=""
+GIT_PERSONAL_EMAIL=""
+
+# Colima VM size
+COLIMA_CPU=4
+COLIMA_MEMORY=8
+COLIMA_DISK=60
