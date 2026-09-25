@@ -1,0 +1,32 @@
+# === Zsh Environment (runs for ALL zsh invocations — keep minimal) ===
+# Managed by mac-setup (symlinked to ~/.zshenv). Machine-specific overrides go in ~/.zshrc.local.
+
+# Homebrew (static — no `brew shellenv` subprocess)
+if [[ -d /opt/homebrew ]]; then
+    export HOMEBREW_PREFIX="/opt/homebrew"
+    export HOMEBREW_REPOSITORY="/opt/homebrew"
+else
+    export HOMEBREW_PREFIX="/usr/local"
+    export HOMEBREW_REPOSITORY="/usr/local/Homebrew"
+fi
+export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar"
+export INFOPATH="$HOMEBREW_PREFIX/share/info:${INFOPATH:-}"
+
+# Tool homes
+export GOPATH="$HOME/go"
+export BUN_INSTALL="$HOME/.bun"
+
+# PATH (single assignment, no subprocesses)
+# mise shims make node/go/python available in non-interactive shells (IDEs, scripts, agents);
+# interactive shells get `mise activate` from .zshrc, which puts real tool paths ahead of these.
+path=(
+    $HOME/.local/bin                # native installers (claude), uv tools
+    $HOME/.local/share/mise/shims   # mise-managed toolchains
+    $BUN_INSTALL/bin                # bun global packages
+    $GOPATH/bin                     # go install binaries
+    $HOME/.cargo/bin                # rust/cargo (personal profile)
+    $HOMEBREW_PREFIX/bin            # homebrew
+    $HOMEBREW_PREFIX/sbin           # homebrew sbin
+    $path                           # system defaults
+)
+typeset -U path

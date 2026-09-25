@@ -1,0 +1,35 @@
+# Global toolchain. Managed by mac-setup (symlinked to ~/.config/mise/config.toml).
+# Projects pin their own versions with mise.toml, .nvmrc, .node-version, .python-version or .go-version.
+# Update everything with `mise upgrade`.
+
+[tools]
+# --- Node.js ---
+node = "lts"
+pnpm = "latest"
+bun = "latest"
+"npm:@antfu/ni" = "latest"       # ni / nr / nun: runs npm, pnpm, yarn or bun depending on the lockfile
+"npm:tsx" = "latest"
+"npm:typescript" = "latest"
+
+# --- Go ---
+go = "latest"
+golangci-lint = "latest"
+"go:mvdan.cc/gofumpt" = "latest"
+"go:golang.org/x/tools/cmd/goimports" = "latest"
+"go:github.com/go-delve/delve/cmd/dlv" = "latest"
+"go:golang.org/x/vuln/cmd/govulncheck" = "latest"
+"go:gotest.tools/gotestsum" = "latest"
+"go:github.com/air-verse/air" = "latest"
+
+# --- Python ---
+python = "3.14"
+uv = "latest"
+ruff = "latest"
+"pipx:pre-commit" = "latest"
+"pipx:poetry" = "latest"
+
+[settings]
+# Read .nvmrc / .node-version / .python-version / .go-version from existing projects
+idiomatic_version_file_enable_tools = ["node", "python", "go"]
+# Install pipx: tools with uv (fast, no global pip)
+pipx.uvx = true

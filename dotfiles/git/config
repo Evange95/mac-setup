@@ -1,0 +1,137 @@
+# Shared Git settings. Managed by mac-setup (symlinked to ~/.config/git/config).
+# Identity (user.name/email/signingkey) and per-directory includes live in ~/.gitconfig,
+# which is machine-specific; `git config --global` writes there, never into this file.
+
+[init]
+    defaultBranch = main
+
+[core]
+    autocrlf = input
+    editor = code --wait
+    pager = delta
+    fsmonitor = true
+    untrackedCache = true
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate = true
+    side-by-side = true
+    line-numbers = true
+    syntax-theme = Catppuccin-Mocha
+    dark = true
+    file-decoration-style = blue ol
+    file-style = bold yellow ul
+    hunk-header-decoration-style = blue box
+    hunk-header-style = file line-number syntax
+
+[diff]
+    algorithm = histogram
+    colorMoved = zebra
+    colorMovedWS = allow-indentation-change
+    mnemonicPrefix = true
+    renames = true
+
+[merge]
+    conflictstyle = zdiff3
+    autoStash = true
+
+[push]
+    default = simple
+    autoSetupRemote = true
+    followTags = true
+
+[pull]
+    rebase = true
+
+[fetch]
+    prune = true
+    pruneTags = true
+    all = true
+
+[rebase]
+    autoSquash = true
+    autoStash = true
+    updateRefs = true
+
+[column]
+    ui = auto
+
+[branch]
+    sort = -committerdate
+
+[tag]
+    sort = version:refname
+    gpgsign = true
+
+[help]
+    autocorrect = prompt
+
+[commit]
+    verbose = true
+    gpgsign = true
+
+[gpg]
+    format = ssh
+
+[log]
+    date = iso
+
+[status]
+    showUntrackedFiles = all
+
+[stash]
+    showPatch = true
+
+[grep]
+    patternType = perl
+
+[credential]
+    helper = osxkeychain
+
+[feature]
+    manyFiles = true
+
+[pack]
+    threads = 0
+
+[index]
+    threads = 0
+
+[maintenance]
+    auto = true
+
+[protocol]
+    version = 2
+
+[rerere]
+    enabled = true
+    autoupdate = true
+
+[transfer]
+    fsckObjects = true
+
+[alias]
+    co = checkout
+    br = branch
+    ci = commit
+    st = status
+    unstage = reset HEAD --
+    last = log -1 HEAD
+    visual = !gitk
+    lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+    undo = reset --soft HEAD~1
+    amend = commit --amend --no-edit
+    wip = !git add --all && git commit -m \"WIP\"
+    ri = rebase -i
+    rim = rebase -i main
+    rc = rebase --continue
+    ra = rebase --abort
+    ss = stash push -m
+    sl = stash list
+    sp = stash pop
+    sd = stash drop
+    la = log --all --graph --pretty=format:'%C(auto)%h%Creset -%C(auto)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+    ds = diff --staged
+    cleanup = !git branch --merged | grep -v \"\\\\*\\\\|main\\\\|master\\\\|develop\" | xargs -n 1 git branch -d

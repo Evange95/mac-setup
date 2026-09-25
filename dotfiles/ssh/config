@@ -1,0 +1,29 @@
+# Created by mac-setup only if ~/.ssh/config does not exist; edit freely afterwards.
+
+# --- Option: 1Password SSH agent (keys never touch disk, Touch ID to use them) ---
+# Enable in 1Password > Settings > Developer, then uncomment:
+# Host *
+#     IdentityAgent "~/Library/Group Containers/2BUA8C4S2Y.com.1password/data/t/agent.sock"
+
+Host *
+    AddKeysToAgent yes
+    UseKeychain yes
+    IdentityFile ~/.ssh/id_ed25519
+
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519
+
+Host gitlab.com
+    HostName gitlab.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519
+
+# --- Second GitHub account (e.g. work) with its own key ---
+# Clone with: git clone git@github-work:org/repo.git
+# Host github-work
+#     HostName github.com
+#     User git
+#     IdentityFile ~/.ssh/id_ed25519_work
+#     IdentitiesOnly yes

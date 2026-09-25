@@ -1,0 +1,31 @@
+# Global gitignore. Managed by mac-setup (copied to ~/.config/git/ignore on each run).
+# Only files that are never meant to be committed in any repo. Project artifacts such as
+# vendor/, build/, dist/, .vscode/ or .envrc belong in each project's own .gitignore.
+
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Editors
+*.swp
+*.swo
+*~
+.idea/
+
+# Local secrets
+.env
+.env.local
+.env.*.local
+
+# Python caches and local virtualenvs
+__pycache__/
+*.py[co]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+
+# Claude Code
+**/.claude/settings.local.json

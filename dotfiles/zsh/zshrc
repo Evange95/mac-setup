@@ -1,0 +1,260 @@
+#===============================================================================
+# Zsh Configuration — No framework, maximum performance
+# Managed by mac-setup (symlinked to ~/.zshrc). Put machine-specific settings
+# (work proxies, tokens, extra aliases) in ~/.zshrc.local, which is not versioned.
+#===============================================================================
+
+# Uncomment to profile: run `zprof` after shell loads
+# zmodload zsh/zprof
+
+#===============================================================================
+# Completion System
+#===============================================================================
+
+# fpath: Homebrew completions + zsh-completions
+fpath=(
+    $HOMEBREW_PREFIX/share/zsh/site-functions
+    $HOMEBREW_PREFIX/share/zsh-completions
+    $fpath
+)
+typeset -U fpath
+
+# compinit: only regenerate dump once per day
+autoload -Uz compinit
+ZSH_COMPDUMP="${ZDOTDIR:-$HOME}/.zcompdump"
+if [[ -f "$ZSH_COMPDUMP" && $(date +'%j') == $(stat -f '%Sm' -t '%j' "$ZSH_COMPDUMP" 2>/dev/null) ]]; then
+    compinit -C -d "$ZSH_COMPDUMP"
+else
+    compinit -d "$ZSH_COMPDUMP"
+    touch "$ZSH_COMPDUMP"
+fi
+
+# Compile zcompdump in background if stale
+{
+    if [[ -s "$ZSH_COMPDUMP" && (! -s "${ZSH_COMPDUMP}.zwc" || "$ZSH_COMPDUMP" -nt "${ZSH_COMPDUMP}.zwc") ]]; then
+        zcompile "$ZSH_COMPDUMP"
+    fi
+} &!
+
+#===============================================================================
+# Completion Styles
+#===============================================================================
+
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "$HOME/.zcompcache"
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*:descriptions' format '%F{yellow}-- %d --%f'
+zstyle ':completion:*' special-dirs true
+
+#===============================================================================
+# Shell Options
+#===============================================================================
+
+setopt AUTO_CD CORRECT
+
+#===============================================================================
+# History
+#===============================================================================
+
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=100000
+SAVEHIST=100000
+setopt EXTENDED_HISTORY HIST_EXPIRE_DUPS_FIRST HIST_IGNORE_ALL_DUPS
+setopt HIST_SAVE_NO_DUPS HIST_FIND_NO_DUPS HIST_IGNORE_SPACE
+setopt HIST_REDUCE_BLANKS INC_APPEND_HISTORY_TIME SHARE_HISTORY
+
+#===============================================================================
+# Key Bindings
+#===============================================================================
+
+# Edit command line in $EDITOR (Ctrl+X Ctrl+E)
+autoload -U edit-command-line
+zle -N edit-command-line
+bindkey '^X^E' edit-command-line
+
+# sudo: double-Esc to toggle sudo prefix
+sudo-command-line() {
+    [[ -z $BUFFER ]] && LBUFFER="$(fc -ln -1)"
+    if [[ "$BUFFER" == sudo\ * ]]; then
+        LBUFFER="${LBUFFER#sudo }"
+    else
+        LBUFFER="sudo $LBUFFER"
+    fi
+}
+zle -N sudo-command-line
+bindkey '\e\e' sudo-command-line
+
+#===============================================================================
+# Environment
+#===============================================================================
+
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export EDITOR="code --wait"
+export VISUAL="$EDITOR"
+export DIRENV_LOG_FORMAT=""
+
+#===============================================================================
+# Cached init scripts: regenerated only when the tool binary is updated
+#===============================================================================
+
+_cached_init() {
+    local name="$1" bin="$HOMEBREW_PREFIX/bin/$1" cache="${HOME}/.cache/$1-init.zsh"
+    shift
+    [[ -x "$bin" ]] || return
+    if [[ ! -f "$cache" || "$bin" -nt "$cache" ]]; then
+        mkdir -p "${cache:h}"
+        "$bin" "$@" > "$cache"
+    fi
+    source "$cache"
+}
+
+#===============================================================================
+# mise (node, go, python, and their tools — see ~/.config/mise/config.toml)
+#===============================================================================
+
+_cached_init mise activate zsh
+
+#===============================================================================
+# FZF
+#===============================================================================
+
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+export FZF_DEFAULT_OPTS='
+  --height 40%
+  --layout=reverse
+  --border
+  --preview "bat --style=numbers --color=always --line-range :500 {}"
+'
+
+_cached_init fzf --zsh
+
+#===============================================================================
+# direnv (inlined hook — no subprocess at startup)
+#===============================================================================
+
+_direnv_hook() {
+    trap -- '' SIGINT
+    eval "$("$HOMEBREW_PREFIX/bin/direnv" export zsh)"
+    trap - SIGINT
+}
+typeset -ag precmd_functions
+if (( ! ${precmd_functions[(I)_direnv_hook]} )); then
+    precmd_functions=(_direnv_hook $precmd_functions)
+fi
+typeset -ag chpwd_functions
+if (( ! ${chpwd_functions[(I)_direnv_hook]} )); then
+    chpwd_functions=(_direnv_hook $chpwd_functions)
+fi
+
+#===============================================================================
+# zoxide
+#===============================================================================
+
+_cached_init zoxide init zsh
+
+#===============================================================================
+# Aliases
+#===============================================================================
+
+# Navigation
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+
+# Modern CLI tools (grep/find are left untouched so copy-pasted commands keep working)
+alias cat="bat"
+alias ls="eza --icons"
+alias ll="eza -la --icons --git"
+alias lt="eza --tree --level=2 --icons"
+
+# Git
+alias g="git"
+alias gs="git status"
+alias ga="git add"
+alias gc="git commit"
+alias gp="git push"
+alias gl="git pull"
+alias gco="git checkout"
+alias gb="git branch"
+alias gd="git diff"
+alias glog="git log --oneline --graph --decorate"
+alias lg="lazygit"
+
+# Docker & Kubernetes
+alias d="docker"
+alias dc="docker compose"
+alias k="kubectl"
+alias kx="kubectx"
+alias kn="kubens"
+
+# Development (ni/nr/nun from @antfu/ni pick npm/pnpm/yarn/bun per project)
+alias py="python"
+alias pn="pnpm"
+alias bx="bunx"
+
+# Monitoring
+alias htop="btop"
+
+# Utilities
+alias ports="lsof -i -P -n | grep LISTEN"
+alias ip="curl -s https://ipinfo.io/ip"
+alias localip="ipconfig getifaddr en0"
+alias cleanup="brew cleanup && docker system prune -af"
+alias update="brew update && brew upgrade && brew cleanup && mise upgrade"
+
+# Quick edits
+alias zshrc="code ~/.zshrc"
+alias reload="exec zsh"
+
+#===============================================================================
+# Functions
+#===============================================================================
+
+mkcd() { mkdir -p "$1" && cd "$1" }
+killport() { lsof -ti:"$1" | xargs kill -9 }
+gcap() { git add -A && git commit -m "$1" && git push }
+dsh() { docker exec -it "$1" /bin/sh }
+kgetall() { kubectl get all -n "${1:-default}" }
+
+pyclean() {
+    command find "${@:-.}" -type f -name "*.py[co]" -delete
+    command find "${@:-.}" -type d -name "__pycache__" -delete
+    command find "${@:-.}" -depth -type d -name ".mypy_cache" -exec rm -r "{}" +
+    command find "${@:-.}" -depth -type d -name ".pytest_cache" -exec rm -r "{}" +
+    command find "${@:-.}" -depth -type d -name ".ruff_cache" -exec rm -r "{}" +
+}
+
+#===============================================================================
+# Machine-specific overrides (not versioned)
+#===============================================================================
+
+[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+
+#===============================================================================
+# Plugins (installed via Homebrew, sourced directly)
+#===============================================================================
+
+source "$HOMEBREW_PREFIX/share/zsh-you-should-use/you-should-use.plugin.zsh"
+source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+# fast-syntax-highlighting MUST be the last plugin
+source "$HOMEBREW_PREFIX/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh"
+
+#===============================================================================
+# Shell Integration
+#===============================================================================
+
+if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
+    test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+fi
+
+#===============================================================================
+# Starship Prompt (must be last)
+#===============================================================================
+
+_cached_init starship init zsh
+unfunction _cached_init
