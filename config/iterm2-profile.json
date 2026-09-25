@@ -3,7 +3,6 @@
     {
       "Name": "Developer",
       "Guid": "developer-mac-setup-profile-001",
-      "Dynamic Profile Parent Name": "Default",
 
       "Custom Command": "No",
       "Custom Directory": "No",

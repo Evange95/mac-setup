@@ -12,3 +12,11 @@ setup() {
     run grep -E '"(Normal|Non Ascii) Font": "MesloLGSNF-Regular [0-9]+"' "$PROFILE_JSON"
     [ "${#lines[@]}" -eq 2 ]
 }
+
+# A parent referenced by name must exist or iTerm2 warns on every launch, and
+# the default profile isn't reliably named "Default". Without the key iTerm2
+# inherits from whichever profile is the default.
+@test "iTerm2 profile does not reference a parent profile by name" {
+    run grep '"Dynamic Profile Parent Name"' "$PROFILE_JSON"
+    [ "$status" -ne 0 ]
+}
