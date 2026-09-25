@@ -12,7 +12,7 @@ step_shell() {
         log_info "Removed ~/.oh-my-zsh (plugins are now installed via Homebrew)"
     fi
     rm -f "$HOME/.p10k.zsh" "$HOME/.fzf.zsh"
-    rm -f "$HOME/.cache/fzf-zsh.zsh" "$HOME/.cache/zoxide-init.zsh" "$HOME/.cache/starship-init.zsh"
+    rm -f "$HOME/.cache/fzf-zsh.zsh" "$HOME/.cache/zoxide-init.zsh" "$HOME/.cache/starship-init.zsh" "$HOME/.cache/mise-init.zsh"
     # fpath changed; force a fresh completion dump
     rm -f "$HOME/.zcompdump"*
 }

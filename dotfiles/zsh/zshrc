@@ -113,9 +113,10 @@ _cached_init() {
 
 #===============================================================================
 # mise (node, go, python, and their tools — see ~/.config/mise/config.toml)
+# Not cached: the activate script embeds the current PATH. It takes ~15ms.
 #===============================================================================
 
-_cached_init mise activate zsh
+(( $+commands[mise] )) && eval "$(mise activate zsh)"
 
 #===============================================================================
 # FZF

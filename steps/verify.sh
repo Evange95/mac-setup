@@ -4,6 +4,7 @@ _tool_version() {
     case "$1" in
         go) go version ;;
         kubectl) kubectl version --client ;;
+        helm) helm version --short ;;
         *) "$1" --version ;;
     esac 2>&1 | head -1
 }

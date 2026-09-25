@@ -1,7 +1,7 @@
 # shellcheck shell=bash
 
 # Microsoft-licensed extensions that are not available in Cursor's marketplace
-CURSOR_UNAVAILABLE=" ms-python.vscode-pylance github.copilot-chat "
+CURSOR_UNAVAILABLE=" ms-python.vscode-pylance "
 
 _install_extensions() {
     local cli="$1" ext
