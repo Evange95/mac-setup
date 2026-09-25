@@ -1,6 +1,7 @@
 # =============================================================================
-# Brewfile — Declarative Homebrew Package List
-# Usage: brew bundle --file=Brewfile
+# Brewfile — packages for every profile
+# Profile extras live in Brewfile.<profile>. Language toolchains (node, go, python)
+# are managed by mise, not Homebrew — see config/mise/config.toml.
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -12,50 +13,46 @@ brew "git"
 brew "curl"
 brew "wget"
 brew "coreutils"        # GNU core utilities
+brew "jq"               # JSON processor
+brew "yq"               # YAML processor
 
 # Modern CLI replacements
 brew "bat"              # Better cat
 brew "eza"              # Better ls
-brew "ripgrep"          # Better grep
+brew "ripgrep"          # Better grep (rg)
 brew "fd"               # Better find
 brew "fzf"              # Fuzzy finder
-brew "jq"               # JSON processor
-brew "yq"               # YAML processor
+brew "zoxide"           # Smarter cd
+brew "btop"             # Resource monitor
+brew "xh"               # Friendly HTTP client
+brew "tldr"             # Simplified man pages
+brew "tree"
+brew "watch"
 
 # Development tools
+brew "mise"             # Toolchain manager (node, go, python, ...)
 brew "gh"               # GitHub CLI
 brew "lazygit"          # Git TUI
 brew "git-delta"        # Syntax-highlighted diff pager
-brew "tldr"             # Simplified man pages
-brew "direnv"           # Per-directory env
+brew "direnv"           # Per-directory env (.envrc)
+brew "just"             # Task runner
+brew "watchexec"        # Re-run commands on file changes
+brew "hyperfine"        # Command benchmarking
+brew "shellcheck"       # Shell script linter
+brew "bats-core"        # Shell script tests (used by this repo)
 brew "starship"         # Cross-shell prompt
-brew "zoxide"           # Smarter cd (z replacement)
-brew "btop"             # Resource monitor
-brew "tree"             # Directory tree
-brew "watch"            # Execute commands periodically
 brew "mas"              # Mac App Store CLI
 
-# Media
-brew "ffmpeg"           # Video/audio processing
+# Zsh plugins (sourced directly from .zshrc)
+brew "zsh-autosuggestions"
+brew "zsh-fast-syntax-highlighting"
+brew "zsh-completions"
+brew "zsh-you-should-use"
 
-# Compression
+# Media & compression
+brew "ffmpeg"
 brew "p7zip"
 brew "unzip"
-
-# Security
-brew "cloudflared"      # DNS-over-HTTPS proxy
-
-# -----------------------------------------------------------------------------
-# Programming Languages & Toolchains
-# -----------------------------------------------------------------------------
-
-# Go
-brew "go"
-
-# Python
-brew "pyenv"
-brew "pyenv-virtualenv"
-brew "pipx"
 
 # -----------------------------------------------------------------------------
 # Container & Kubernetes
@@ -63,7 +60,7 @@ brew "pipx"
 
 brew "colima"                    # Docker runtime for macOS
 brew "docker"                    # Docker CLI
-brew "docker-compose"            # Multi-container orchestration
+brew "docker-compose"            # `docker compose` plugin
 brew "docker-credential-helper"  # Credential management
 brew "kubernetes-cli"            # kubectl
 brew "k9s"                       # Kubernetes TUI
@@ -81,24 +78,18 @@ cask "cursor"
 
 # AI & Productivity
 cask "claude"
-cask "obsidian"
 cask "notion"
-cask "notion-calendar"
-cask "notion-mail"
 
-# API & Development
+# API & Database clients
 cask "insomnia"
 cask "tableplus"
 
 # Browsers
 cask "google-chrome"
-cask "arc"
 cask "firefox"
 
 # Communication
 cask "slack"
-cask "discord"
-cask "telegram"
 cask "zoom"
 
 # Utilities
@@ -107,16 +98,6 @@ cask "1password"
 cask "rectangle"         # Window management
 cask "caffeine"          # Prevent sleep
 cask "hiddenbar"         # Menu bar management
-
-# Security
-cask "lulu"              # Outbound firewall
-cask "nordvpn"
-
-# Media
-cask "spotify"
-
-# Crypto
-cask "trezor-suite"
 
 # Fonts
 cask "font-meslo-lg-nerd-font"

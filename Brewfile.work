@@ -1,0 +1,4 @@
+# =============================================================================
+# Brewfile.work — installed only with --profile work
+# Add work-specific tools here (company VPN client, cloud CLIs, ...).
+# =============================================================================

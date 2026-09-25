@@ -1,0 +1,18 @@
+# =============================================================================
+# Brewfile.personal — installed only with --profile personal
+# =============================================================================
+
+brew "cloudflared"       # DNS-over-HTTPS proxy
+
+cask "arc"
+cask "obsidian"
+cask "notion-calendar"
+cask "notion-mail"
+cask "discord"
+cask "telegram"
+cask "spotify"
+cask "trezor-suite"
+
+# Security (conflict with corporate network/VPN agents, so personal only)
+cask "lulu"              # Outbound firewall
+cask "nordvpn"
