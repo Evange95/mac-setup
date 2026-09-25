@@ -8,7 +8,7 @@ setup() {
     source "$REPO_DIR/lib/cli.sh"
     for name in "${ALL_STEPS[@]}"; do
         [ -f "$REPO_DIR/steps/$name.sh" ] || { echo "missing steps/$name.sh"; return 1; }
-        run bash -c "source '$REPO_DIR/lib/common.sh'; source '$REPO_DIR/steps/$name.sh'; declare -F step_$name"
+        run bash -c "source '$REPO_DIR/lib/common.sh'; source '$REPO_DIR/lib/probes.sh'; source '$REPO_DIR/steps/$name.sh'; declare -F step_$name"
         [ "$status" -eq 0 ] || { echo "steps/$name.sh does not define step_$name"; return 1; }
     done
 }

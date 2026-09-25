@@ -15,6 +15,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
 # shellcheck source=lib/cli.sh
 source "$SCRIPT_DIR/lib/cli.sh"
+# shellcheck source=lib/probes.sh
+source "$SCRIPT_DIR/lib/probes.sh"
 
 # setup.conf may set PROFILE; --profile overrides it
 if [[ -f "$SCRIPT_DIR/setup.conf" ]]; then

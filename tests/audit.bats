@@ -3,6 +3,7 @@
 setup() {
     REPO_DIR="$(cd "$BATS_TEST_DIRNAME/.." && pwd)"
     source "$REPO_DIR/lib/common.sh"
+    source "$REPO_DIR/lib/probes.sh"
     source "$REPO_DIR/steps/audit.sh"
     AUDIT_FAILED=0
 }
