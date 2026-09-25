@@ -2,7 +2,7 @@
 # Argument parsing and step selection. Must stay bash 3.2 compatible (macOS /bin/bash).
 
 # Canonical execution order. Each name maps to steps/<name>.sh defining step_<name>.
-ALL_STEPS=(xcode homebrew packages languages shell iterm editors git ssh security macos dirs docker verify)
+ALL_STEPS=(xcode homebrew packages languages shell iterm editors git ssh security macos dirs docker audit verify)
 
 PROFILES=(personal work)
 

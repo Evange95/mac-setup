@@ -34,6 +34,12 @@ setup() {
     [[ "$output" == *git* ]]
 }
 
+@test "work profile still runs the read-only security audit" {
+    parse_args --profile work
+    run resolve_steps
+    [[ "$output" == *audit* ]]
+}
+
 @test "--only runs just the listed steps, in canonical order" {
     parse_args --only git,shell
     run resolve_steps
