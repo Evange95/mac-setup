@@ -23,8 +23,11 @@ step_macos() {
     defaults write NSGlobalDomain KeyRepeat -int 2
     defaults write NSGlobalDomain InitialKeyRepeat -int 15
 
-    # Trackpad: tap to click
+    # Trackpad: tap to click (built-in and Magic Trackpad; -currentHost covers the login screen)
+    defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
     defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
+    defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+    defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 
     # Dock
     defaults write com.apple.dock tilesize -int 54
