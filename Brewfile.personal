@@ -2,9 +2,7 @@
 # Brewfile.personal — installed only with --profile personal
 # =============================================================================
 
-brew "cloudflared"       # DNS-over-HTTPS proxy
-
-cask "arc"
+cask "arc"               # maintenance-only since 2025; kept while in use
 cask "obsidian"
 cask "notion-calendar"
 cask "notion-mail"

@@ -96,8 +96,8 @@ cask "zoom"
 cask "alfred"
 cask "1password"
 cask "rectangle"         # Window management
-cask "caffeine"          # Prevent sleep
-cask "hiddenbar"         # Menu bar management
+mas "Amphetamine", id: 937984704  # Prevent sleep (needs App Store sign-in)
+cask "jordanbaird-ice"   # Menu bar management (Ice)
 
 # Fonts
 cask "font-meslo-lg-nerd-font"
