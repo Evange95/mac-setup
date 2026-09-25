@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tools
+        run: brew install shellcheck bats-core
+      - name: ShellCheck
+        run: shellcheck -x setup.sh lib/*.sh steps/*.sh
+      - name: Zsh syntax
+        run: for f in dotfiles/zsh/*; do zsh -n "$f"; done
+      - name: Tests
+        run: bats tests/
+      - name: Validate mise config
+        run: |
+          brew install mise
+          MISE_GLOBAL_CONFIG_FILE="$PWD/config/mise/config.toml" mise ls --missing

@@ -1,8 +1,11 @@
 anthropic.claude-code
 astro-build.astro-vscode
+biomejs.biome
+charliermarsh.ruff
 christian-kohler.npm-intellisense
 dbaeumer.vscode-eslint
 eamodio.gitlens
+editorconfig.editorconfig
 esbenp.prettier-vscode
 github.copilot-chat
 github.vscode-github-actions
@@ -16,3 +19,5 @@ ms-python.vscode-python-envs
 pkief.material-icon-theme
 rust-lang.rust-analyzer
 tomoki1207.pdf
+usernamehw.errorlens
+yoavbls.pretty-ts-errors
