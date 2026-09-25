@@ -39,6 +39,8 @@ brew "just"             # Task runner
 brew "watchexec"        # Re-run commands on file changes
 brew "hyperfine"        # Command benchmarking
 brew "shellcheck"       # Shell script linter
+brew "git-filter-repo"  # Rewrite git history
+brew "rtk"              # Token-optimized CLI proxy for Claude Code
 brew "bats-core"        # Shell script tests (used by this repo)
 brew "starship"         # Cross-shell prompt
 brew "mas"              # Mac App Store CLI
@@ -61,6 +63,7 @@ brew "unzip"
 brew "colima"                    # Docker runtime for macOS
 brew "docker"                    # Docker CLI
 brew "docker-compose"            # `docker compose` plugin
+brew "docker-buildx"             # `docker buildx` plugin (BuildKit)
 brew "docker-credential-helper"  # Credential management
 brew "kubernetes-cli"            # kubectl
 brew "k9s"                       # Kubernetes TUI

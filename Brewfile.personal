@@ -14,3 +14,12 @@ cask "trezor-suite"
 # Security (conflict with corporate network/VPN agents, so personal only)
 cask "lulu"              # Outbound firewall
 cask "nordvpn"
+
+# Mac App Store (needs App Store sign-in)
+mas "Xcode", id: 497799835
+mas "Developer", id: 640199958
+mas "Keynote", id: 409183694
+mas "Numbers", id: 409203825
+mas "Pages", id: 409201541
+mas "Kindle", id: 302584613
+mas "MKPlayer", id: 1335612105
