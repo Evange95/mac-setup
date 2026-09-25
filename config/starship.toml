@@ -17,6 +17,7 @@ $rust\
 $golang\
 $docker_context\
 $kubernetes\
+$aws\
 $cmd_duration\
 $line_break\
 $character"""
@@ -75,12 +76,22 @@ format = "[$symbol$context]($style) "
 symbol = "docker "
 only_with_files = true
 
+# Always visible when a kube context is set, so you know where kubectl will act.
+# Production-looking contexts turn red.
 [kubernetes]
 disabled = false
 format = "[$symbol$context( \\($namespace\\))]($style) "
 symbol = "k8s "
-detect_files = ["helmfile.yaml", "Chart.yaml"]
-detect_folders = ["k8s", "kubernetes", "helm", "charts"]
+style = "cyan"
+
+[[kubernetes.contexts]]
+context_pattern = ".*(prod|prd|live).*"
+style = "bold red"
+
+# Shown only when AWS_PROFILE / AWS_REGION / credentials env vars are set
+[aws]
+format = "[$symbol($profile)(\\($region\\))]($style) "
+symbol = "aws "
 
 # --- Command Duration ---
 [cmd_duration]
@@ -90,9 +101,6 @@ style = "bold yellow"
 
 # --- Disabled modules ---
 [package]
-disabled = true
-
-[aws]
 disabled = true
 
 [gcloud]
