@@ -1,8 +1,24 @@
 # shellcheck shell=bash
 
+# Global tools for every profile, plus config/mise/<profile>.toml (if any) via conf.d
+link_mise_config() {
+    link_file "$SCRIPT_DIR/config/mise/config.toml" "$HOME/.config/mise/config.toml"
+
+    local conf_d="$HOME/.config/mise/conf.d" profile_conf name
+    for profile_conf in "$SCRIPT_DIR"/config/mise/*.toml; do
+        name="$(basename "$profile_conf")"
+        [[ "$name" == "config.toml" ]] && continue
+        if [[ "$name" == "$PROFILE.toml" ]]; then
+            link_file "$profile_conf" "$conf_d/$name"
+        elif [[ -L "$conf_d/$name" ]]; then
+            rm "$conf_d/$name"
+        fi
+    done
+}
+
 step_languages() {
     # --- mise: node, go, python and their tooling (see config/mise/) ---
-    link_file "$SCRIPT_DIR/config/mise/config.toml" "$HOME/.config/mise/config.toml"
+    link_mise_config
 
     mise install || log_warning "Some mise tools failed to install; rerun: mise install"
 

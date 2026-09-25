@@ -21,4 +21,7 @@ jobs:
       - name: Validate mise config
         run: |
           brew install mise
-          MISE_GLOBAL_CONFIG_FILE="$PWD/config/mise/config.toml" mise ls --missing
+          for f in config/mise/*.toml; do
+            dir="$(mktemp -d)"; cp "$f" "$dir/config.toml"
+            (cd "$dir" && MISE_CONFIG_DIR="$dir" mise ls --missing)
+          done
