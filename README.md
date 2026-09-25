@@ -23,7 +23,7 @@ On a company-managed Mac use `PROFILE="work"`: it skips admin-only security sett
 | `--skip a,b` | skip these steps |
 | `--dry-run` | print profile and steps, run nothing |
 
-Steps: `xcode homebrew packages languages shell iterm editors git ssh security macos dirs docker verify`
+Steps: `xcode homebrew packages languages shell iterm editors git ssh security macos dirs docker audit verify`
 
 ## What goes where
 
