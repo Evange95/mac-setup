@@ -15,8 +15,8 @@
       "Rows": 35,
       "Window Type": 0,
 
-      "Normal Font": "MesloLGSNerdFont-Regular 13",
-      "Non Ascii Font": "MesloLGSNerdFont-Regular 13",
+      "Normal Font": "MesloLGSNF-Regular 13",
+      "Non Ascii Font": "MesloLGSNF-Regular 13",
       "Use Non-ASCII Font": false,
       "Horizontal Spacing": 1,
       "Vertical Spacing": 1.1,
