@@ -53,6 +53,7 @@ brew "zsh-you-should-use"
 
 # Media & compression
 brew "ffmpeg"
+brew "webp"             # cwebp/dwebp
 brew "p7zip"
 brew "unzip"
 

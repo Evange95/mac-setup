@@ -53,5 +53,5 @@ load_session_env() {
             break
         fi
     done
-    export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
+    export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH:/Library/TeX/texbin"
 }
