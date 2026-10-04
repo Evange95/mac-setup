@@ -12,3 +12,21 @@ setup() {
 @test "TeX binaries are on the static PATH for non-login shells" {
     grep -q '/Library/TeX/texbin' "$REPO_DIR/dotfiles/zsh/zshenv"
 }
+
+# macOS 27 draws the menu bar as one window; Ice broke and is unmaintained, Thaw is its fork
+@test "menu bar manager is Thaw, not Ice" {
+    grep -q '^cask "thaw"' "$REPO_DIR/Brewfile"
+    ! grep -q 'jordanbaird-ice' "$REPO_DIR/Brewfile"
+}
+
+@test "packages step warns when the replaced Ice app is still installed" {
+    source "$REPO_DIR/lib/common.sh"
+    source "$REPO_DIR/steps/packages.sh"
+    APPS_DIR="$(mktemp -d)"
+    run _warn_replaced_apps
+    [ -z "$output" ]
+    mkdir "$APPS_DIR/Ice.app"
+    run _warn_replaced_apps
+    [[ "$output" == *"brew uninstall --cask jordanbaird-ice"* ]]
+    rm -rf "$APPS_DIR"
+}

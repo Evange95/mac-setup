@@ -101,7 +101,7 @@ cask "alfred"
 cask "1password"
 cask "rectangle"         # Window management
 mas "Amphetamine", id: 937984704  # Prevent sleep (needs App Store sign-in)
-cask "jordanbaird-ice"   # Menu bar management (Ice)
+cask "thaw"              # Menu bar management (fork of Ice, which broke on macOS 27)
 
 # Fonts
 cask "font-meslo-lg-nerd-font"
