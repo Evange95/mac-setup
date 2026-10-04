@@ -2,11 +2,9 @@
 # Brewfile.personal — installed only with --profile personal
 # =============================================================================
 
-cask "arc"               # maintenance-only since 2025; kept while in use
 cask "obsidian"
 cask "notion-calendar"
 cask "notion-mail"
-cask "discord"
 cask "telegram"
 cask "spotify"
 cask "trezor-suite"
@@ -15,8 +13,7 @@ cask "trezor-suite"
 # so tlmgr is never needed for a missing package; installs to /Library/TeX (asks for sudo)
 cask "mactex-no-gui"
 
-# Security (conflict with corporate network/VPN agents, so personal only)
-cask "lulu"              # Outbound firewall
+# VPN (conflicts with corporate network/VPN agents, so personal only)
 cask "nordvpn"
 
 # Mac App Store (needs App Store sign-in)

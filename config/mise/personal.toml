@@ -1,9 +1,4 @@
 # Extra global tools for the personal profile (linked to ~/.config/mise/conf.d/personal.toml).
 
 [tools]
-yarn = "latest"
 "npm:wrangler" = "latest"
-"npm:fastify-cli" = "latest"
-"pipx:mypy" = "latest"
-"pipx:git+https://github.com/NVIDIA/skillspector.git" = "latest"
-"pipx:tau-ai" = "latest"

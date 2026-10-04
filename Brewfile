@@ -78,7 +78,6 @@ brew "kubectx"                   # Context/namespace switcher
 # Terminal & Editors
 cask "iterm2"
 cask "visual-studio-code"
-cask "cursor"
 
 # AI & Productivity
 cask "claude"
@@ -86,15 +85,10 @@ cask "notion"
 
 # API & Database clients
 cask "insomnia"
-cask "tableplus"
 
 # Browsers
 cask "google-chrome"
 cask "firefox"
-
-# Communication
-cask "slack"
-cask "zoom"
 
 # Utilities
 cask "alfred"

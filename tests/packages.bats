@@ -36,3 +36,13 @@ setup() {
     grep -q '^brew "tlrc"' "$REPO_DIR/Brewfile"
     ! grep -q '^brew "tldr"' "$REPO_DIR/Brewfile"
 }
+
+@test "Slack and Zoom are installed only on the work profile" {
+    ! grep -qE '^cask "(slack|zoom)"' "$REPO_DIR/Brewfile" "$REPO_DIR/Brewfile.personal"
+    grep -q '^cask "slack"' "$REPO_DIR/Brewfile.work"
+    grep -q '^cask "zoom"' "$REPO_DIR/Brewfile.work"
+}
+
+@test "Cursor is not installed or configured" {
+    ! grep -rqi 'cursor' "$REPO_DIR/Brewfile" "$REPO_DIR/steps/editors.sh" "$REPO_DIR/steps/verify.sh"
+}
