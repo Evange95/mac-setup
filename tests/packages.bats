@@ -30,3 +30,9 @@ setup() {
     [[ "$output" == *"brew uninstall --cask jordanbaird-ice"* ]]
     rm -rf "$APPS_DIR"
 }
+
+# The tldr formula is deprecated as unmaintained; tlrc is the official client (same `tldr` command)
+@test "tldr pages come from tlrc" {
+    grep -q '^brew "tlrc"' "$REPO_DIR/Brewfile"
+    ! grep -q '^brew "tldr"' "$REPO_DIR/Brewfile"
+}

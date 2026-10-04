@@ -25,7 +25,7 @@ brew "fzf"              # Fuzzy finder
 brew "zoxide"           # Smarter cd
 brew "btop"             # Resource monitor
 brew "xh"               # Friendly HTTP client
-brew "tldr"             # Simplified man pages
+brew "tlrc"             # Simplified man pages (`tldr`, official client)
 brew "tree"
 brew "watch"
 
