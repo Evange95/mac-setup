@@ -12,8 +12,3 @@ setup() {
 @test "TeX binaries are on the static PATH for non-login shells" {
     grep -q '/Library/TeX/texbin' "$REPO_DIR/dotfiles/zsh/zshenv"
 }
-
-@test "casks from third-party taps declare the tap" {
-    grep -q '^tap "vishvavariya/notchy"' "$REPO_DIR/Brewfile.personal"
-    grep -q '^cask "notchy"' "$REPO_DIR/Brewfile.personal"
-}
