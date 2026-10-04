@@ -36,8 +36,11 @@ Steps: `xcode homebrew packages languages shell iterm editors git ssh security m
 | `dotfiles/git/ignore` | `~/.config/git/ignore` (copy) |
 | `dotfiles/ssh/config` | `~/.ssh/config` (only if missing) |
 | `config/starship.toml` | `~/.config/starship.toml` (symlink) |
+| `config/iterm2-profile.json` | iTerm2 dynamic profile "Developer" (copy), set as default profile |
 
 Because the dotfiles are symlinks, editing `~/.zshrc` edits the repo — commit it. Machine-specific settings go in `~/.zshrc.local`.
+
+**iTerm2:** change the Developer profile in `config/iterm2-profile.json` and rerun `./setup.sh --only iterm`. Changes made in iTerm2's Settings to a dynamic profile are discarded on reload; to experiment, duplicate it first. Don't delete iTerm2's own "Default" profile. If iTerm2 is open, the step can't set the default profile — quit it and rerun.
 
 ## Development
 
