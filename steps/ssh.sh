@@ -35,8 +35,8 @@ step_ssh() {
             grep -q "^$email " "$allowed_signers" && continue
             echo "$email namespaces=\"git\" $(cat "$ssh_key.pub")" >> "$allowed_signers"
         done
-        git config --global user.signingkey "$ssh_key.pub"
-        git config --global gpg.ssh.allowedSignersFile "$allowed_signers"
+        git config --file "$HOME/.gitconfig" user.signingkey "$ssh_key.pub"
+        git config --file "$HOME/.gitconfig" gpg.ssh.allowedSignersFile "$allowed_signers"
         log_success "Git commit signing configured with SSH"
     fi
 }

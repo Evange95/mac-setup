@@ -1,6 +1,7 @@
 # Shared Git settings. Managed by mac-setup (symlinked to ~/.config/git/config).
 # Identity (user.name/email/signingkey) and per-directory includes live in ~/.gitconfig,
-# which is machine-specific; `git config --global` writes there, never into this file.
+# which is machine-specific. `git config --global` writes there only while ~/.gitconfig
+# exists (otherwise into this file), so mac-setup always uses `--file ~/.gitconfig`.
 
 [init]
     defaultBranch = main

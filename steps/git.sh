@@ -1,11 +1,14 @@
 # shellcheck shell=bash
 
+# Personal settings are written with `--file ~/.gitconfig`, never `--global`: when
+# ~/.gitconfig is missing, --global writes to ~/.config/git/config, i.e. into this repo.
+
 # Writes ~/.config/git/<name>.gitconfig and includes it for repos under <dir>.
 _git_dir_identity() {
     local name="$1" dir="$2" email="$3"
     local file="$HOME/.config/git/$name.gitconfig"
     printf '[user]\n    email = %s\n' "$email" > "$file"
-    git config --global "includeIf.gitdir:$dir.path" "$file"
+    git config --file "$HOME/.gitconfig" "includeIf.gitdir:$dir.path" "$file"
     log_success "Repos under $dir commit as $email"
 }
 
@@ -19,12 +22,12 @@ step_git() {
     if [[ -f "$HOME/.gitconfig" ]]; then
         local key removed=0
         for key in $(git config -f "$SCRIPT_DIR/dotfiles/git/config" --name-only --list | sort -u) core.excludesfile; do
-            if git config --global --get-all "$key" &>/dev/null; then
+            if git config --file "$HOME/.gitconfig" --get-all "$key" &>/dev/null; then
                 if [[ $removed -eq 0 ]]; then
                     cp "$HOME/.gitconfig" "$HOME/.gitconfig.backup.$(date +%Y%m%d%H%M%S)"
                     removed=1
                 fi
-                git config --global --unset-all "$key"
+                git config --file "$HOME/.gitconfig" --unset-all "$key"
             fi
         done
         if [[ $removed -eq 1 ]]; then
@@ -34,8 +37,8 @@ step_git() {
     fi
 
     # Identity: default for every repo, optionally overridden per directory
-    git config --global user.name "$GIT_USER_NAME"
-    git config --global user.email "$GIT_USER_EMAIL"
+    git config --file "$HOME/.gitconfig" user.name "$GIT_USER_NAME"
+    git config --file "$HOME/.gitconfig" user.email "$GIT_USER_EMAIL"
     [[ -n "$GIT_WORK_EMAIL" ]] && _git_dir_identity work "$HOME/Code/work/" "$GIT_WORK_EMAIL"
     [[ -n "$GIT_PERSONAL_EMAIL" ]] && _git_dir_identity personal "$HOME/Code/personal/" "$GIT_PERSONAL_EMAIL"
 
