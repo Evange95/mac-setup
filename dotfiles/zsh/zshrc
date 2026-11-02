@@ -181,9 +181,9 @@ alias ....="cd ../../.."
 
 # Modern CLI tools (grep/find are left untouched so copy-pasted commands keep working)
 alias cat="bat"
-alias ls="eza --icons"
-alias ll="eza -la --icons --git"
-alias lt="eza --tree --level=2 --icons"
+alias ls="eza --icons=auto"
+alias ll="eza -la --icons=auto --git"
+alias lt="eza --tree --level=2 --icons=auto"
 
 # Git
 alias g="git"
