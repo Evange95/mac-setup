@@ -39,11 +39,6 @@ step_macos() {
     defaults write com.apple.terminal SecureKeyboardEntry -bool true
     defaults write com.googlecode.iterm2 "Secure Input" -bool true
 
-    # Firefox: no telemetry or studies (enterprise policies read from the user defaults)
-    defaults write org.mozilla.firefox EnterprisePoliciesEnabled -bool true
-    defaults write org.mozilla.firefox DisableTelemetry -bool true
-    defaults write org.mozilla.firefox DisableFirefoxStudies -bool true
-
     killall Finder 2>/dev/null || true
     killall Dock 2>/dev/null || true
     log_success "macOS preferences applied"

@@ -3,6 +3,7 @@
 # =============================================================================
 
 cask "obsidian"
+cask "proton-mail"       # Quit it when not in use: it is a full browser engine, like every Electron app
 cask "telegram"
 cask "spotify"
 cask "trezor-suite"

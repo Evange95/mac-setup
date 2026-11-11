@@ -23,7 +23,7 @@ On a company-managed Mac use `PROFILE="work"`: it skips admin-only security sett
 | `--skip a,b` | skip these steps |
 | `--dry-run` | print profile and steps, run nothing |
 
-Steps: `xcode homebrew packages languages shell iterm editors git ssh security macos dirs docker audit verify`
+Steps: `xcode homebrew packages languages shell iterm editors firefox git ssh security macos dirs docker audit verify`
 
 ## What goes where
 
@@ -35,6 +35,7 @@ Steps: `xcode homebrew packages languages shell iterm editors git ssh security m
 | `dotfiles/git/config` | `~/.config/git/config` (symlink); identity stays in `~/.gitconfig` |
 | `dotfiles/git/ignore` | `~/.config/git/ignore` (copy) |
 | `dotfiles/ssh/config` | `~/.ssh/config` (only if missing) |
+| `config/firefox/user.js` | `user.js` in every Firefox profile (symlink): memory and privacy preferences |
 | `config/starship.toml` | `~/.config/starship.toml` (symlink) |
 | `config/iterm2-profile.json` | iTerm2 dynamic profile "Developer" (copy), set as default profile |
 

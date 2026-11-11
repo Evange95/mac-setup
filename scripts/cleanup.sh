@@ -94,6 +94,17 @@ cleanup_caches() {
     _cache "npm cache" "$HOME/.npm/_cacache" npm cache clean --force
     _cache "uv cache" "$HOME/.cache/uv" uv cache prune
     _cache "Go build cache" "$HOME/Library/Caches/go-build" go clean -cache
+
+    # Xcode: build products and simulators for runtimes that are no longer installed
+    local derived="$HOME/Library/Developer/Xcode/DerivedData"
+    if [[ -d "$derived" ]]; then
+        echo "  Xcode DerivedData: $(dir_size "$derived")"
+        act rm -rf "$derived"
+    fi
+    if [[ -d "$HOME/Library/Developer/CoreSimulator" ]]; then
+        echo "  Xcode simulators: $(dir_size "$HOME/Library/Developer/CoreSimulator")"
+        act xcrun simctl delete unavailable
+    fi
 }
 
 cleanup_docker() {
