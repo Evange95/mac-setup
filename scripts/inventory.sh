@@ -37,7 +37,7 @@ top_processes() {
     ps -axo rss=,pcpu=,comm= | awk '
         {
             rss = $1; cpu = $2; $1 = ""; $2 = ""; name = $0
-            if (match(name, /[^\/]+\.app/)) name = substr(name, RSTART, RLENGTH)
+            if (match(name "/", /[^\/]+\.app\//)) name = substr(name, RSTART, RLENGTH - 1)
             else { n = split(name, parts, "/"); name = parts[n] }
             sub(/^ +/, "", name)
             mem[name] += rss; load[name] += cpu; count[name]++
