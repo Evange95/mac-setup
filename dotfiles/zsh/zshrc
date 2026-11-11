@@ -11,9 +11,8 @@
 # Completion System
 #===============================================================================
 
-# fpath: Homebrew completions + zsh-completions (+ nix-darwin packages, when used)
+# fpath: Homebrew completions + zsh-completions
 fpath=(
-    /run/current-system/sw/share/zsh/site-functions
     $HOMEBREW_PREFIX/share/zsh/site-functions
     $HOMEBREW_PREFIX/share/zsh-completions
     $fpath
@@ -114,7 +113,7 @@ export DIRENV_LOG_FORMAT=""
 #===============================================================================
 
 # The cache is stamped with the binary's resolved path, which changes on every Homebrew
-# upgrade (Cellar/<version>) and Nix rebuild (store path, whose mtime never changes).
+# upgrade (Cellar/<version>).
 _cached_init() {
     local bin="$commands[$1]" cache="${HOME}/.cache/$1-init.zsh" stamp first
     shift

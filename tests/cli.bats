@@ -84,20 +84,3 @@ setup() {
     [ "$status" -ne 0 ]
     [[ "$output" == *"Unknown option: --bogus"* ]]
 }
-
-@test "packages come from Homebrew unless --nix or setup.conf says otherwise" {
-    parse_args
-    [ "$PACKAGE_MANAGER" = "brew" ]
-    parse_args --nix
-    [ "$PACKAGE_MANAGER" = "nix" ]
-    PACKAGE_MANAGER="nix"
-    parse_args
-    [ "$PACKAGE_MANAGER" = "nix" ]
-}
-
-@test "unknown package manager is rejected" {
-    PACKAGE_MANAGER="apt"
-    run parse_args
-    [ "$status" -ne 0 ]
-    [[ "$output" == *"Unknown package manager"* ]]
-}

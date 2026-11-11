@@ -31,8 +31,6 @@ path=(
     $BUN_INSTALL/bin                # bun global packages
     $GOPATH/bin                     # go install binaries
     $HOME/.cargo/bin                # rust/cargo (personal profile)
-    /run/current-system/sw/bin      # nix-darwin packages (./setup.sh --nix); absent otherwise
-    /nix/var/nix/profiles/default/bin  # nix itself
     $HOMEBREW_PREFIX/bin            # homebrew
     $HOMEBREW_PREFIX/sbin           # homebrew sbin
     /Library/TeX/texbin             # MacTeX (personal profile)

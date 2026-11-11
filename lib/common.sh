@@ -44,7 +44,7 @@ try() {
     "$@" || log_warning "Failed (continuing): $*"
 }
 
-# Make Homebrew, Nix, mise-managed tools and native installers visible to the current session.
+# Make Homebrew, mise-managed tools and native installers visible to the current session.
 load_session_env() {
     local brew_bin
     for brew_bin in /opt/homebrew/bin/brew /usr/local/bin/brew; do
@@ -53,5 +53,5 @@ load_session_env() {
             break
         fi
     done
-    export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:$PATH:/Library/TeX/texbin"
+    export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH:/Library/TeX/texbin"
 }

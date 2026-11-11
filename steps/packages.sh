@@ -1,7 +1,4 @@
 # shellcheck shell=bash
-# Installs what the Brewfiles declare. With PACKAGE_MANAGER=nix (--nix) the same files are
-# read by the flake: formulae come from nixpkgs (nix/formulae.nix), casks and App Store
-# apps still from Homebrew, driven by nix-darwin.
 
 APPS_DIR="${APPS_DIR:-/Applications}"
 
@@ -10,7 +7,7 @@ _warn_app() {
     return 0
 }
 
-# Apps replaced in the Brewfiles; nothing removes them unless BREW_CLEANUP=uninstall
+# Apps replaced in the Brewfiles; brew bundle doesn't remove them (scripts/cleanup.sh does)
 _warn_replaced_apps() {
     _warn_app "Ice.app" "Ice is replaced by Thaw (Ice is broken on macOS 27): brew uninstall --cask jordanbaird-ice"
     _warn_app "1Password.app" "1Password is replaced by Proton Pass. After moving your vault: brew uninstall --cask 1password"
@@ -23,78 +20,38 @@ _warn_replaced_apps() {
     fi
 }
 
-# Lists Homebrew packages that <brewfile> does not declare; removes them if BREW_CLEANUP=uninstall
-_brew_cleanup() {
-    local brewfile="$1" extra
-    if [[ "${BREW_CLEANUP:-none}" == "uninstall" ]]; then
-        brew bundle cleanup --force --file="$brewfile" || log_warning "brew bundle cleanup failed"
-        return 0
-    fi
-    extra="$(brew bundle cleanup --file="$brewfile" 2>/dev/null || true)"
-    if [[ -n "$extra" ]]; then
-        log_warning "Installed with Homebrew but not declared in this repo:"
-        echo "$extra"
-        log_warning "Add them to a Brewfile, or remove them all with BREW_CLEANUP=\"uninstall\" in setup.conf"
-    fi
-}
-
-_packages_brew() {
+# Prints the path of a temporary Brewfile with everything the profile declares
+declared_brewfile() {
     local brewfile declared
     declared="$(mktemp)"
+    for brewfile in "$SCRIPT_DIR/Brewfile" "$SCRIPT_DIR/Brewfile.$PROFILE"; do
+        [[ -f "$brewfile" ]] && cat "$brewfile" >> "$declared"
+    done
+    echo "$declared"
+}
+
+# Prints what Homebrew has installed that the profile does not declare (nothing if in sync)
+undeclared_packages() {
+    local declared
+    declared="$(declared_brewfile)"
+    brew bundle cleanup --file="$declared" 2>/dev/null || true
+    rm -f "$declared"
+}
+
+step_packages() {
+    local brewfile extra
     for brewfile in "$SCRIPT_DIR/Brewfile" "$SCRIPT_DIR/Brewfile.$PROFILE"; do
         [[ -f "$brewfile" ]] || continue
         log_info "Installing $(basename "$brewfile")..."
         # --no-upgrade: installing must not silently upgrade what is already there (use `update` alias)
         brew bundle --no-upgrade --file="$brewfile" || log_warning "Some items in $(basename "$brewfile") failed"
-        cat "$brewfile" >> "$declared"
     done
-    _brew_cleanup "$declared"
-    rm -f "$declared"
-}
 
-_install_nix() {
-    command -v nix &>/dev/null && return 0
-    log_info "Installing Nix (official installer; asks for confirmation and sudo)..."
-    sh <(curl --proto '=https' --tlsv1.2 -sSfL https://nixos.org/nix/install)
-    load_session_env
-    command -v nix &>/dev/null || { log_error "Nix was installed but is not on the PATH. Open a new terminal and rerun."; return 1; }
-}
-
-_packages_nix() {
-    _install_nix || return 1
-
-    local flake="$SCRIPT_DIR#$PROFILE" declared nix_bin
-    local nix_flags=(--extra-experimental-features "nix-command flakes")
-    # Machine-specific values reach the flake through the environment, hence --impure
-    local flake_env=("MAC_SETUP_USER=$USER" "MAC_SETUP_BREW_CLEANUP=${BREW_CLEANUP:-none}")
-    nix_bin="$(command -v nix)"
-
-    # As the user, so flake.lock is not created by root. Commit it after the first run.
-    nix "${nix_flags[@]}" flake lock "$SCRIPT_DIR"
-
-    log_info "Building and activating the $PROFILE configuration (sudo)..."
-    if command -v darwin-rebuild &>/dev/null; then
-        sudo env "${flake_env[@]}" "$(command -v darwin-rebuild)" switch --impure --flake "$flake"
-    else
-        sudo env "${flake_env[@]}" "$nix_bin" "${nix_flags[@]}" run "$SCRIPT_DIR#darwin-rebuild" -- switch --impure --flake "$flake"
-    fi
-    load_session_env
-
-    # What Homebrew should still own in this mode: casks, App Store apps and the few
-    # formulae nix/formulae.nix leaves to it. Everything else it has is a leftover.
-    declared="$(mktemp)"
-    if env "${flake_env[@]}" nix "${nix_flags[@]}" eval --impure --raw \
-        "$SCRIPT_DIR#darwinConfigurations.$PROFILE.config.homebrew.brewfile" > "$declared"; then
-        _brew_cleanup "$declared"
-    fi
-    rm -f "$declared"
-}
-
-step_packages() {
-    if [[ "${PACKAGE_MANAGER:-brew}" == "nix" ]]; then
-        _packages_nix
-    else
-        _packages_brew
+    extra="$(undeclared_packages)"
+    if [[ -n "$extra" ]]; then
+        log_warning "Installed with Homebrew but not declared in this repo:"
+        echo "$extra"
+        log_warning "Add them to a Brewfile, or review and remove them with ./scripts/cleanup.sh"
     fi
     _warn_replaced_apps
 }

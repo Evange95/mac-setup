@@ -47,21 +47,6 @@ setup() {
     ! grep -rqi 'cursor' "$REPO_DIR/Brewfile" "$REPO_DIR/steps/editors.sh" "$REPO_DIR/steps/verify.sh"
 }
 
-# The Nix path reads the Brewfiles; a formula it cannot place would fail the build on the Mac
-@test "every Brewfile formula says where it comes from in the Nix path" {
-    local name missing=""
-    for name in $(sed -n 's/^brew "\([^"]*\)".*/\1/p' "$REPO_DIR"/Brewfile "$REPO_DIR"/Brewfile.*); do
-        grep -qE "^  \"?$name\"? = " "$REPO_DIR/nix/formulae.nix" || missing="$missing $name"
-    done
-    [ -z "$missing" ] || { echo "missing in nix/formulae.nix:$missing"; false; }
-}
-
-# nix/brewfile.nix matches from the start of the line: an indented or multi-line entry would be skipped
-@test "Brewfile entries are one per line, in the form the Nix path can read" {
-    ! grep -hvE '^(#.*|)$|^(brew|cask|tap) "[^"]+"( +#.*)?$|^mas "[^"]+", id: [0-9]+( +#.*)?$' \
-        "$REPO_DIR"/Brewfile "$REPO_DIR"/Brewfile.*
-}
-
 @test "replaced apps still installed are reported, each with how to remove it" {
     source "$REPO_DIR/lib/common.sh"
     source "$REPO_DIR/steps/packages.sh"
@@ -74,12 +59,15 @@ setup() {
     rm -rf "$APPS_DIR"
 }
 
-@test "undeclared Homebrew packages are reported, and removed only with BREW_CLEANUP=uninstall" {
+@test "undeclared Homebrew packages are listed against both Brewfiles of the profile" {
     source "$REPO_DIR/lib/common.sh"
     source "$REPO_DIR/steps/packages.sh"
-    brew() { [[ "$*" == *--force* ]] && echo "FORCED" || echo "Would uninstall formulae: pkhex-cli"; }
-    run _brew_cleanup /dev/null
-    [[ "$output" == *"pkhex-cli"* && "$output" != *FORCED* ]]
-    BREW_CLEANUP=uninstall run _brew_cleanup /dev/null
-    [[ "$output" == *FORCED* ]]
+    SCRIPT_DIR="$REPO_DIR" PROFILE=personal
+    brew() {
+        local args="$*"
+        local file="${args##*--file=}"
+        grep -q '^brew "git"' "$file" && grep -q '^cask "obsidian"' "$file" && echo "Would uninstall formulae: pkhex-cli"
+    }
+    run undeclared_packages
+    [[ "$output" == *"pkhex-cli"* ]]
 }

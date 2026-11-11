@@ -2,11 +2,6 @@
 # Brewfile — packages for every profile
 # Profile extras live in Brewfile.<profile>. Language toolchains (node, go, python)
 # are managed by mise, not Homebrew — see config/mise/config.toml.
-#
-# These files are also the package list for the Nix path (./setup.sh --nix): casks and
-# App Store apps are installed from here through nix-darwin, and every `brew` line needs
-# an entry in nix/formulae.nix saying which nixpkgs package replaces it.
-# Keep one entry per line: `brew "x"`, `cask "x"`, `mas "Name", id: N`, `tap "x"`.
 # =============================================================================
 
 # -----------------------------------------------------------------------------

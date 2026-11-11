@@ -5,7 +5,6 @@ step_docker() {
     # `docker compose` works
     local docker_config="$HOME/.docker/config.json"
     local plugin_dir="$HOMEBREW_PREFIX/lib/docker/cli-plugins"
-    [[ "${PACKAGE_MANAGER:-brew}" == "nix" ]] && plugin_dir="/run/current-system/sw/libexec/docker/cli-plugins"
     mkdir -p "$HOME/.docker"
     [[ -f "$docker_config" ]] || echo '{}' > "$docker_config"
     if ! jq -e --arg d "$plugin_dir" '(.cliPluginsExtraDirs // []) | index($d)' "$docker_config" &>/dev/null; then
