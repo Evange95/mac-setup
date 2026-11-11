@@ -2,7 +2,7 @@
 
 #===============================================================================
 # macOS Developer Setup
-# Usage:  ./setup.sh [--profile personal|work] [--only a,b] [--skip a,b] [--dry-run]
+# Usage:  ./setup.sh [--profile personal|work] [--nix] [--only a,b] [--skip a,b] [--dry-run]
 # Config: cp setup.conf.example setup.conf and fill in your details
 # Each step lives in steps/<name>.sh; order and profiles are defined in lib/cli.sh.
 #===============================================================================
@@ -32,6 +32,7 @@ echo "======================================================================="
 echo "              macOS Developer Environment Setup"
 echo "======================================================================="
 echo "Profile: $PROFILE"
+echo "Packages: $PACKAGE_MANAGER"
 echo "Steps:   $(echo "$STEPS" | tr '\n' ' ')"
 echo ""
 

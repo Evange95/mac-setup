@@ -14,19 +14,20 @@ bun = "latest"
 # --- Go ---
 go = "latest"
 golangci-lint = "latest"
-"go:mvdan.cc/gofumpt" = "latest"
+# Prebuilt binaries from the mise registry
+gofumpt = "latest"
+gotestsum = "latest"
+air = "latest"
+# Not in the registry: compiled with `go install`, so they are rebuilt on every Go upgrade
 "go:golang.org/x/tools/cmd/goimports" = "latest"
 "go:github.com/go-delve/delve/cmd/dlv" = "latest"
 "go:golang.org/x/vuln/cmd/govulncheck" = "latest"
-"go:gotest.tools/gotestsum" = "latest"
-"go:github.com/air-verse/air" = "latest"
 
 # --- Python ---
 python = "3.14"
 uv = "latest"
 ruff = "latest"
 "pipx:pre-commit" = "latest"
-"pipx:poetry" = "latest"
 
 [settings]
 # Read .nvmrc / .node-version / .python-version / .go-version from existing projects

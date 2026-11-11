@@ -3,14 +3,12 @@
 _tool_version() {
     case "$1" in
         go) go version ;;
-        kubectl) kubectl version --client ;;
-        helm) helm version --short ;;
         *) "$1" --version ;;
     esac 2>&1 | head -1
 }
 
 step_verify() {
-    local tools=(git mise node pnpm bun go golangci-lint python uv ruff docker kubectl helm delta starship zoxide code claude)
+    local tools=(git mise node pnpm bun go golangci-lint python uv ruff docker delta starship zoxide code claude)
     [[ "$PROFILE" == "personal" ]] && tools+=(rustc xelatex latexmk)
 
     local cmd pass=0 fail=0

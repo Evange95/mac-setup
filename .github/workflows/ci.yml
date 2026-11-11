@@ -13,7 +13,7 @@ jobs:
       - name: Install tools
         run: brew install shellcheck bats-core
       - name: ShellCheck
-        run: shellcheck -x setup.sh lib/*.sh steps/*.sh
+        run: shellcheck -x setup.sh lib/*.sh steps/*.sh scripts/*.sh
       - name: Zsh syntax
         run: for f in dotfiles/zsh/*; do zsh -n "$f"; done
       - name: Tests

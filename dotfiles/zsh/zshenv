@@ -12,6 +12,12 @@ fi
 export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar"
 export INFOPATH="$HOMEBREW_PREFIX/share/info:${INFOPATH:-}"
 
+# Opt out of usage reporting (most CLIs honour DO_NOT_TRACK; these have their own switch)
+export DO_NOT_TRACK=1
+export HOMEBREW_NO_ANALYTICS=1
+export ASTRO_TELEMETRY_DISABLED=1
+export WRANGLER_SEND_METRICS=false
+
 # Tool homes
 export GOPATH="$HOME/go"
 export BUN_INSTALL="$HOME/.bun"
@@ -25,6 +31,8 @@ path=(
     $BUN_INSTALL/bin                # bun global packages
     $GOPATH/bin                     # go install binaries
     $HOME/.cargo/bin                # rust/cargo (personal profile)
+    /run/current-system/sw/bin      # nix-darwin packages (./setup.sh --nix); absent otherwise
+    /nix/var/nix/profiles/default/bin  # nix itself
     $HOMEBREW_PREFIX/bin            # homebrew
     $HOMEBREW_PREFIX/sbin           # homebrew sbin
     /Library/TeX/texbin             # MacTeX (personal profile)

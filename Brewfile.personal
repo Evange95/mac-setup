@@ -3,11 +3,21 @@
 # =============================================================================
 
 cask "obsidian"
-cask "notion-calendar"
-cask "notion-mail"
 cask "telegram"
 cask "spotify"
 cask "trezor-suite"
+
+# Lighter native alternatives on trial next to iTerm2 and VS Code
+cask "ghostty"
+cask "zed"
+
+# Media, hardware and games
+cask "handbrake-app"
+cask "transmission"
+cask "insta360-link-controller"
+cask "macusb"            # Bootable macOS installers
+cask "openemu"
+cask "melonds"
 
 # LaTeX (CV repos build with XeLaTeX + awesome-cv). Full TeX Live without the GUI apps,
 # so tlmgr is never needed for a missing package; installs to /Library/TeX (asks for sudo)

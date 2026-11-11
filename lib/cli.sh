@@ -6,6 +6,9 @@ ALL_STEPS=(xcode homebrew packages languages shell iterm editors git ssh securit
 
 PROFILES=(personal work)
 
+# Where the packages step gets CLI tools from (apps are Homebrew casks either way)
+PACKAGE_MANAGERS=(brew nix)
+
 # Steps a profile leaves out unless explicitly requested with --only
 profile_skips() {
     case "$1" in
@@ -20,6 +23,8 @@ Usage: ./setup.sh [options]
 
 Options:
   --profile NAME    personal (default) or work. Can also be set as PROFILE in setup.conf
+  --nix             install CLI packages with Nix (nix-darwin) instead of Homebrew.
+                    Can also be set as PACKAGE_MANAGER="nix" in setup.conf
   --only a,b        run only these steps
   --skip a,b        skip these steps
   --dry-run         print the steps that would run, then exit
@@ -38,9 +43,11 @@ _contains() {
     return 1
 }
 
-# Sets PROFILE, ONLY, SKIP, DRY_RUN. PROFILE keeps any value already set (from setup.conf).
+# Sets PROFILE, PACKAGE_MANAGER, ONLY, SKIP, DRY_RUN. PROFILE and PACKAGE_MANAGER keep
+# any value already set (from setup.conf).
 parse_args() {
     PROFILE="${PROFILE:-personal}"
+    PACKAGE_MANAGER="${PACKAGE_MANAGER:-brew}"
     ONLY=""
     SKIP=""
     DRY_RUN=0
@@ -48,6 +55,7 @@ parse_args() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --profile) PROFILE="$2"; shift 2 ;;
+            --nix) PACKAGE_MANAGER="nix"; shift ;;
             --only) ONLY="$2"; shift 2 ;;
             --skip) SKIP="$2"; shift 2 ;;
             --dry-run) DRY_RUN=1; shift ;;
@@ -58,6 +66,10 @@ parse_args() {
 
     if ! _contains "$PROFILE" "${PROFILES[@]}"; then
         echo "Unknown profile: $PROFILE (expected: ${PROFILES[*]})" >&2
+        return 1
+    fi
+    if ! _contains "$PACKAGE_MANAGER" "${PACKAGE_MANAGERS[@]}"; then
+        echo "Unknown package manager: $PACKAGE_MANAGER (expected: ${PACKAGE_MANAGERS[*]})" >&2
         return 1
     fi
 }

@@ -105,7 +105,7 @@ collect() {
     section "Other version/package managers present"
     local dir
     for dir in .volta .pyenv .nvm .asdf .sdkman .rbenv .nix-profile .conda miniconda3 anaconda3 .oh-my-zsh; do
-        [[ -e "$HOME/$dir" ]] && echo "~/$dir"
+        [[ -e "$HOME/$dir" ]] && echo "$HOME/$dir"
     done
     [[ -d /nix ]] && echo "/nix"
     have nix && nix --version 2>&1
@@ -118,8 +118,8 @@ collect() {
     run "Docker disk usage" docker system df
 
     section "zsh interactive startup time (3 runs)"
-    local i
-    for i in 1 2 3; do
+    local _
+    for _ in 1 2 3; do
         { /usr/bin/time zsh -i -c exit; } 2>&1 | tail -n 1
     done
 }
