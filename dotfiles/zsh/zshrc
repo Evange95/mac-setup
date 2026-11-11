@@ -233,6 +233,10 @@ mkcd() { mkdir -p "$1" && cd "$1" }
 killport() { lsof -ti:"$1" | xargs kill -9 }
 gcap() { git add -A && git commit -m "$1" && git push }
 dsh() { docker exec -it "$1" /bin/sh }
+# Docker engine: the homelab (context from HOMELAB_DOCKER_HOST in setup.conf), which lets
+# the local VM stop and give its memory back, or the local Colima VM
+dhome() { docker context use homelab || return; colima status &>/dev/null && colima stop; return 0 }
+dlocal() { colima status &>/dev/null || colima start; docker context use colima }
 
 pyclean() {
     command find "${@:-.}" -type f -name "*.py[co]" -delete

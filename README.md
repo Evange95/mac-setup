@@ -49,6 +49,10 @@ bats tests/
 shellcheck -x setup.sh lib/*.sh steps/*.sh scripts/*.sh
 ```
 
+## Running containers on another machine
+
+Set `HOMELAB_DOCKER_HOST="ssh://user@host"` in `setup.conf` and run `./setup.sh --only docker`. Then `dhome` points `docker` at that machine and stops the local Colima VM (which otherwise keeps its memory for as long as it runs); `dlocal` starts Colima and switches back. Containers started this way run on the remote machine: bind mounts refer to its filesystem, not the Mac's, and published ports are reached at its address.
+
 ## Cleaning up without reinstalling macOS
 
 ```bash
