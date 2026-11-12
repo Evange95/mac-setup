@@ -24,7 +24,7 @@ air = "latest"
 "go:golang.org/x/vuln/cmd/govulncheck" = "latest"
 
 # --- Python ---
-python = "3.14"
+python = "3.15.2"
 uv = "latest"
 ruff = "latest"
 "pipx:pre-commit" = "latest"
