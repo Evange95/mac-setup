@@ -46,3 +46,28 @@ setup() {
 @test "Cursor is not installed or configured" {
     ! grep -rqi 'cursor' "$REPO_DIR/Brewfile" "$REPO_DIR/steps/editors.sh" "$REPO_DIR/steps/verify.sh"
 }
+
+@test "replaced apps still installed are reported, each with how to remove it" {
+    source "$REPO_DIR/lib/common.sh"
+    source "$REPO_DIR/steps/packages.sh"
+    APPS_DIR="$(mktemp -d)"
+    mkdir "$APPS_DIR/1Password.app" "$APPS_DIR/Google Chrome.app" "$APPS_DIR/Insomnia.app"
+    run _warn_replaced_apps
+    [[ "$output" == *"brew uninstall --cask 1password"* ]]
+    [[ "$output" == *"brew uninstall --cask google-chrome"* ]]
+    [[ "$output" == *"brew uninstall --cask insomnia"* ]]
+    rm -rf "$APPS_DIR"
+}
+
+@test "undeclared Homebrew packages are listed against both Brewfiles of the profile" {
+    source "$REPO_DIR/lib/common.sh"
+    source "$REPO_DIR/steps/packages.sh"
+    SCRIPT_DIR="$REPO_DIR" PROFILE=personal
+    brew() {
+        local args="$*"
+        local file="${args##*--file=}"
+        grep -q '^brew "git"' "$file" && grep -q '^cask "obsidian"' "$file" && echo "Would uninstall formulae: pkhex-cli"
+    }
+    run undeclared_packages
+    [[ "$output" == *"pkhex-cli"* ]]
+}

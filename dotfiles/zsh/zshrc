@@ -112,13 +112,17 @@ export DIRENV_LOG_FORMAT=""
 # Cached init scripts: regenerated only when the tool binary is updated
 #===============================================================================
 
+# The cache is stamped with the binary's resolved path, which changes on every Homebrew
+# upgrade (Cellar/<version>).
 _cached_init() {
-    local name="$1" bin="$HOMEBREW_PREFIX/bin/$1" cache="${HOME}/.cache/$1-init.zsh"
+    local bin="$commands[$1]" cache="${HOME}/.cache/$1-init.zsh" stamp first
     shift
-    [[ -x "$bin" ]] || return
-    if [[ ! -f "$cache" || "$bin" -nt "$cache" ]]; then
+    [[ -n "$bin" ]] || return
+    stamp="# ${bin:A}"
+    [[ -r "$cache" ]] && IFS= read -r first < "$cache"
+    if [[ "$first" != "$stamp" ]]; then
         mkdir -p "${cache:h}"
-        "$bin" "$@" > "$cache"
+        { print -r -- "$stamp"; "$bin" "$@" } > "$cache"
     fi
     source "$cache"
 }
@@ -152,7 +156,7 @@ _cached_init fzf --zsh
 
 _direnv_hook() {
     trap -- '' SIGINT
-    eval "$("$HOMEBREW_PREFIX/bin/direnv" export zsh)"
+    eval "$(direnv export zsh)"
     trap - SIGINT
 }
 typeset -ag precmd_functions
@@ -201,9 +205,6 @@ alias lg="lazygit"
 # Docker & Kubernetes
 alias d="docker"
 alias dc="docker compose"
-alias k="kubectl"
-alias kx="kubectx"
-alias kn="kubens"
 
 # Development (ni/nr/nun from @antfu/ni pick npm/pnpm/yarn/bun per project)
 alias py="python"
@@ -232,7 +233,10 @@ mkcd() { mkdir -p "$1" && cd "$1" }
 killport() { lsof -ti:"$1" | xargs kill -9 }
 gcap() { git add -A && git commit -m "$1" && git push }
 dsh() { docker exec -it "$1" /bin/sh }
-kgetall() { kubectl get all -n "${1:-default}" }
+# Docker engine: the homelab (context from HOMELAB_DOCKER_HOST in setup.conf), which lets
+# the local VM stop and give its memory back, or the local Colima VM
+dhome() { docker context use homelab || return; colima status &>/dev/null && colima stop; return 0 }
+dlocal() { colima status &>/dev/null || colima start; docker context use colima }
 
 pyclean() {
     command find "${@:-.}" -type f -name "*.py[co]" -delete

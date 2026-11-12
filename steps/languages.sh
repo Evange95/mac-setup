@@ -22,15 +22,7 @@ step_languages() {
 
     mise install || log_warning "Some mise tools failed to install; rerun: mise install"
 
-    # --- Rust (personal only) ---
-    if [[ "$PROFILE" == "personal" ]]; then
-        if ! command -v rustup &>/dev/null; then
-            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-        fi
-        # shellcheck source=/dev/null
-        source "$HOME/.cargo/env" 2>/dev/null || true
-        rustup component add rustfmt clippy rust-analyzer
-    fi
+    # Rust (personal only) is a mise tool too: config/mise/personal.toml
 
     # --- Claude Code (native installer; the npm package is deprecated) ---
     if [[ -x "$HOME/.local/bin/claude" ]]; then

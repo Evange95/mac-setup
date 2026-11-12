@@ -17,7 +17,13 @@ GIT_USER_EMAIL="your@email.com"
 GIT_WORK_EMAIL=""
 GIT_PERSONAL_EMAIL=""
 
-# Colima VM size
+# Colima VM size. The VM keeps its memory for as long as it runs, so on a 16 GB Mac
+# 4 GB leaves room for the browser and editor; stop it with `colima stop` when idle.
 COLIMA_CPU=4
-COLIMA_MEMORY=8
+COLIMA_MEMORY=4
 COLIMA_DISK=60
+
+# Optional: a Docker engine on another machine (e.g. a homelab reached over Tailscale).
+# Creates the Docker context "homelab"; `dhome` switches to it and stops the local VM,
+# `dlocal` switches back. Needs key-based SSH to a user that can run docker there.
+# HOMELAB_DOCKER_HOST="ssh://user@host"

@@ -1,10 +1,5 @@
 # Created by mac-setup only if ~/.ssh/config does not exist; edit freely afterwards.
 
-# --- Option: 1Password SSH agent (keys never touch disk, Touch ID to use them) ---
-# Enable in 1Password > Settings > Developer, then uncomment:
-# Host *
-#     IdentityAgent "~/Library/Group Containers/2BUA8C4S2Y.com.1password/data/t/agent.sock"
-
 Host *
     AddKeysToAgent yes
     UseKeychain yes

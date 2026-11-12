@@ -2,3 +2,5 @@
 
 [tools]
 "npm:wrangler" = "latest"
+# mise drives rustup (toolchains stay in ~/.rustup, binaries in ~/.cargo/bin)
+rust = { version = "stable", components = "rustfmt,clippy,rust-analyzer" }

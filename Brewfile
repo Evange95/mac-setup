@@ -41,6 +41,7 @@ brew "hyperfine"        # Command benchmarking
 brew "shellcheck"       # Shell script linter
 brew "git-filter-repo"  # Rewrite git history
 brew "rtk"              # Token-optimized CLI proxy for Claude Code
+brew "mole"             # Disk cleanup and app leftovers (`mo`)
 brew "bats-core"        # Shell script tests (used by this repo)
 brew "starship"         # Cross-shell prompt
 brew "mas"              # Mac App Store CLI
@@ -58,7 +59,7 @@ brew "p7zip"
 brew "unzip"
 
 # -----------------------------------------------------------------------------
-# Container & Kubernetes
+# Containers
 # -----------------------------------------------------------------------------
 
 brew "colima"                    # Docker runtime for macOS
@@ -66,10 +67,6 @@ brew "docker"                    # Docker CLI
 brew "docker-compose"            # `docker compose` plugin
 brew "docker-buildx"             # `docker buildx` plugin (BuildKit)
 brew "docker-credential-helper"  # Credential management
-brew "kubernetes-cli"            # kubectl
-brew "k9s"                       # Kubernetes TUI
-brew "helm"                      # Kubernetes package manager
-brew "kubectx"                   # Context/namespace switcher
 
 # -----------------------------------------------------------------------------
 # Applications (Casks)
@@ -83,18 +80,18 @@ cask "visual-studio-code"
 cask "claude"
 cask "notion"
 
-# API & Database clients
-cask "insomnia"
+# API client (offline, collections are plain files; replaces Insomnia, which needs an account)
+cask "bruno"
 
-# Browsers
-cask "google-chrome"
+# Browser (Safari is the second engine for testing; Chrome's background updater is not worth it)
 cask "firefox"
 
 # Utilities
 cask "alfred"
-cask "1password"
+cask "proton-pass"
 cask "rectangle"         # Window management
-mas "Amphetamine", id: 937984704  # Prevent sleep (needs App Store sign-in)
+cask "vorssaint"         # Menu bar toolkit: keep-awake, system monitor, volume mixer, app uninstaller
+mas "Tailscale", id: 1475387142  # Needs App Store sign-in. Do not also install the `tailscale` formula
 cask "thaw"              # Menu bar management (fork of Ice, which broke on macOS 27)
 
 # Fonts
