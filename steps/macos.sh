@@ -37,7 +37,6 @@ step_macos() {
 
     # Secure keyboard entry in terminals
     defaults write com.apple.terminal SecureKeyboardEntry -bool true
-    defaults write com.googlecode.iterm2 "Secure Input" -bool true
 
     killall Finder 2>/dev/null || true
     killall Dock 2>/dev/null || true

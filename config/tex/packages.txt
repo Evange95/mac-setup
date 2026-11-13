@@ -1,0 +1,17 @@
+# TeX Live packages installed on top of BasicTeX (personal profile), one per line.
+# BasicTeX ships XeLaTeX and the LaTeX core only; these are what the CV repos
+# (awesome-cv) need. tlmgr pulls in their dependencies. A build that stops on
+# "File `x.sty' not found": tlmgr search --global --file x.sty, then add the package here.
+latexmk
+enumitem
+ragged2e
+fancyhdr
+xifthen
+ifmtarg
+setspace
+parskip
+unicode-math
+fontawesome
+sourcesans
+tcolorbox
+tikzfill

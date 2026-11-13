@@ -10,20 +10,13 @@ setup() {
 teardown() { rm -rf "$DIR"; }
 
 @test "a missing editor settings file is created with telemetry off" {
-    _ensure_setting "$DIR/User/settings.json" "telemetry.telemetryLevel" '{ "telemetry.telemetryLevel": "off" }' x > /dev/null
-    grep -q '"telemetry.telemetryLevel": "off"' "$DIR/User/settings.json"
+    _ensure_setting "$DIR/User/settings.json" "telemetry" '{ "telemetry": { "metrics": false } }' x > /dev/null
+    grep -q '"telemetry": { "metrics": false }' "$DIR/User/settings.json"
 }
 
 @test "an existing settings file is never rewritten, only reported" {
     echo '{ "editor.fontSize": 13 }' > "$DIR/settings.json"
-    run _ensure_setting "$DIR/settings.json" "telemetry.telemetryLevel" '{}' '"telemetry.telemetryLevel": "off"'
-    [[ "$output" == *'"telemetry.telemetryLevel": "off"'* ]]
+    run _ensure_setting "$DIR/settings.json" "telemetry" '{}' '"telemetry": { "metrics": false }'
+    [[ "$output" == *'"telemetry": { "metrics": false }'* ]]
     [ "$(cat "$DIR/settings.json")" = '{ "editor.fontSize": 13 }' ]
-}
-
-@test "no extension is both installed and removed" {
-    local ext
-    for ext in "${VSCODE_REPLACED_EXTENSIONS[@]}"; do
-        ! grep -qix "$ext" "$REPO_DIR/config/vscode-extensions.txt"
-    done
 }

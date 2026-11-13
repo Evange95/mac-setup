@@ -73,8 +73,8 @@ brew "docker-credential-helper"  # Credential management
 # -----------------------------------------------------------------------------
 
 # Terminal & Editors
-cask "iterm2"
-cask "visual-studio-code"
+cask "ghostty"
+cask "zed"
 
 # AI & Productivity
 cask "claude"

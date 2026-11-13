@@ -8,7 +8,7 @@
 
 [core]
     autocrlf = input
-    editor = code --wait
+    editor = zed --wait
     pager = delta
     fsmonitor = true
     untrackedCache = true

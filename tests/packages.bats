@@ -6,7 +6,26 @@ setup() {
 
 # The CV repos build with XeLaTeX (awesome-cv: fontspec, fontawesome, sourcesanspro)
 @test "personal profile installs a TeX distribution with XeLaTeX" {
-    grep -qE '^cask "mactex-no-gui"' "$REPO_DIR/Brewfile.personal"
+    grep -qE '^cask "basictex"' "$REPO_DIR/Brewfile.personal"
+}
+
+# BasicTeX lacks most packages; only the missing ones are installed, so a rerun needs no sudo
+@test "TeX packages missing from BasicTeX are installed, and nothing when all are there" {
+    source "$REPO_DIR/lib/common.sh"
+    source "$REPO_DIR/steps/packages.sh"
+    SCRIPT_DIR="$REPO_DIR" PROFILE=personal
+    grep -qx 'latexmk' "$REPO_DIR/config/tex/packages.txt"
+    tlmgr() { printf '%s\n' latexmk fontspec; }
+    sudo() { echo "sudo $*"; }
+    run install_tex_packages
+    [[ "$output" == *"update --self"*"sudo "*"install "*"enumitem"*"fontawesome"* ]]
+    [[ "$output" != *"install latexmk"* ]]
+    tlmgr() { grep -v '^#' "$REPO_DIR/config/tex/packages.txt"; }
+    run install_tex_packages
+    [[ "$output" == *"already installed"* && "$output" != *"sudo "* ]]
+    PROFILE=work
+    run install_tex_packages
+    [ -z "$output" ]
 }
 
 @test "TeX binaries are on the static PATH for non-login shells" {
@@ -70,4 +89,51 @@ setup() {
     }
     run undeclared_packages
     [[ "$output" == *"pkhex-cli"* ]]
+}
+
+# A disabled cask cannot be installed and fails the whole `brew bundle` run
+@test "casks Homebrew disabled are not declared" {
+    ! grep -qE '^cask "(openemu|melonds)"' "$REPO_DIR"/Brewfile*
+}
+
+# The 409… ids were retired by Apple: mas can neither install nor recognise them
+@test "Keynote, Numbers and Pages use their current App Store ids" {
+    grep -q '^mas "Keynote", id: 361285480' "$REPO_DIR/Brewfile.personal"
+    grep -q '^mas "Numbers", id: 361304891' "$REPO_DIR/Brewfile.personal"
+    grep -q '^mas "Pages", id: 361309726' "$REPO_DIR/Brewfile.personal"
+}
+
+@test "a failed Brewfile run lists what is still missing" {
+    source "$REPO_DIR/lib/common.sh"
+    source "$REPO_DIR/steps/packages.sh"
+    SCRIPT_DIR="$(mktemp -d)" PROFILE=personal
+    touch "$SCRIPT_DIR/Brewfile"
+    brew() {
+        case "$*" in
+            "bundle check"*) printf '%s\n' "brew bundle can't satisfy your Brewfile's dependencies." "→ Cask zed needs to be installed." ;;
+            "bundle cleanup"*) ;;
+            *) return 1 ;;
+        esac
+    }
+    run step_packages
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Still missing"* ]]
+    [[ "$output" == *"→ Cask zed needs to be installed."* ]]
+    [[ "$output" != *"can't satisfy"* ]]
+    rm -rf "$SCRIPT_DIR"
+}
+
+# fontawesome asks for the font by name, which XeTeX on macOS only finds among system fonts
+@test "TeX fonts loaded by name are copied into ~/Library/Fonts once" {
+    source "$REPO_DIR/lib/common.sh"
+    source "$REPO_DIR/steps/packages.sh"
+    SCRIPT_DIR="$REPO_DIR" PROFILE=personal HOME="$(mktemp -d)"
+    echo font > "$HOME/src.otf"
+    kpsewhich() { echo "$HOME/src.otf"; }
+    run install_tex_fonts
+    [[ "$output" == *"Installed TeX font FontAwesome.otf"* ]]
+    cmp "$HOME/src.otf" "$HOME/Library/Fonts/FontAwesome.otf"
+    run install_tex_fonts
+    [ -z "$output" ]
+    rm -rf "$HOME"
 }

@@ -8,21 +8,18 @@ cask "telegram"
 cask "spotify"
 cask "trezor-suite"
 
-# Lighter native alternatives on trial next to iTerm2 and VS Code
-cask "ghostty"
-cask "zed"
-
 # Media, hardware and games
 cask "handbrake-app"
 cask "transmission"
 cask "insta360-link-controller"
 cask "macusb"            # Bootable macOS installers
-cask "openemu"
-cask "melonds"
+# OpenEmu and melonDS are installed by hand: Homebrew disabled both casks (they fail the
+# Gatekeeper check), and a disabled cask makes every `brew bundle` run fail
 
-# LaTeX (CV repos build with XeLaTeX + awesome-cv). Full TeX Live without the GUI apps,
-# so tlmgr is never needed for a missing package; installs to /Library/TeX (asks for sudo)
-cask "mactex-no-gui"
+# LaTeX (CV repos build with XeLaTeX + awesome-cv). BasicTeX is ~100 MB against the 7 GB of
+# full MacTeX; the packages it lacks are listed in config/tex/packages.txt and installed by
+# the packages step. Installs to /Library/TeX (asks for sudo)
+cask "basictex"
 
 # VPN (conflicts with corporate network/VPN agents, so personal only)
 cask "nordvpn"
@@ -30,8 +27,9 @@ cask "nordvpn"
 # Mac App Store (needs App Store sign-in)
 mas "Xcode", id: 497799835
 mas "Developer", id: 640199958
-mas "Keynote", id: 409183694
-mas "Numbers", id: 409203825
-mas "Pages", id: 409201541
+# Keynote, Numbers and Pages moved to new App Store ids; the old 409… ones no longer exist
+mas "Keynote", id: 361285480
+mas "Numbers", id: 361304891
+mas "Pages", id: 361309726
 mas "Kindle", id: 302584613
 mas "MKPlayer", id: 1335612105

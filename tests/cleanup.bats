@@ -12,7 +12,7 @@ setup() {
         echo "brew $*" >> "$CALLS"
         case "$*" in
             "bundle cleanup --file="*) echo "Would uninstall casks: google-chrome" ;;
-            "info --cask"*) echo '{"casks":[{"artifacts":[{"app":["Firefox.app"]},{"zap":[]},{"app":[{"target":"Renamed.app"}]}]}]}' ;;
+            "info --cask"*) echo '{"casks":[{"artifacts":[{"app":["Firefox.app"]},{"zap":[]},{"app":[{"target":"Renamed.app"}]}]},{"artifacts":[{"uninstall":[{"quit":["com.nordvpn.macos","com.nordvpn.launcher"],"pkgutil":"x"}]},{"pkg":["NordVPN.pkg"]}]},{"artifacts":[{"uninstall":[{"quit":"com.insta360.linkcontroller"}]}]}]}' ;;
         esac
     }
 }
@@ -57,6 +57,34 @@ teardown() { rm -rf "$HOME"; }
     run unmanaged_apps
     [[ "$output" == *"Pokemon TCG Live.app"* ]]
     [[ "$output" != *Firefox* && "$output" != *Renamed* && "$output" != *Kindle* ]]
+}
+
+@test "a background job whose program was uninstalled is flagged with how to remove it" {
+    LAUNCH_DIRS="$HOME/Library/LaunchAgents $BATS_TEST_TMPDIR/LaunchDaemons"
+    mkdir -p $LAUNCH_DIRS
+    plist() { printf '<plist version="1.0"><dict><key>ProgramArguments</key><array><string>%s</string></array></dict></plist>' "$1"; }
+    plist /bin/sh > "$HOME/Library/LaunchAgents/alive.plist"
+    plist /opt/gone/bin/tailscaled > "$BATS_TEST_TMPDIR/LaunchDaemons/sh.brew.tailscale.plist"
+    run background_jobs
+    [[ "$output" == *"alive.plist"* ]]
+    [[ "$output" != *"/bin/sh is gone"* ]]
+    [[ "$output" == *"/opt/gone/bin/tailscaled is gone"* ]]
+    [[ "$output" == *"sudo launchctl bootout system '$BATS_TEST_TMPDIR/LaunchDaemons/sh.brew.tailscale.plist'"* ]]
+}
+
+# A pkg cask declares no app; its app is recognised by the bundle id the cask quits on uninstall
+@test "apps installed by pkg casks are not reported as installed by hand" {
+    defaults() {
+        case "$1 $2" in
+            "read $APPS_DIR/NordVPN.app/Contents/Info") echo com.nordvpn.macos ;;
+            "read $APPS_DIR/Insta360 Link Controller.app/Contents/Info") echo com.insta360.linkcontroller ;;
+            *) echo com.example.other ;;
+        esac
+    }
+    mkdir -p "$APPS_DIR/NordVPN.app" "$APPS_DIR/Insta360 Link Controller.app" "$APPS_DIR/Other.app"
+    run unmanaged_apps
+    [[ "$output" == *"Other.app"* ]]
+    [[ "$output" != *NordVPN* && "$output" != *Insta360* ]]
 }
 
 @test "unknown profile is rejected before anything runs" {

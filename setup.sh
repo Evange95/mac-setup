@@ -77,7 +77,6 @@ echo "  1. Restart your terminal (or run: exec zsh)"
 echo "  2. Machine-specific shell settings go in ~/.zshrc.local (not versioned)"
 echo "  3. Add your SSH key to GitHub (signing + auth): https://github.com/settings/keys"
 echo "  4. Authenticate GitHub CLI: gh auth login"
-echo "  5. Set iTerm2 profile to 'Developer' in Settings > Profiles"
 echo ""
 
 if [[ -f "$HOME/.ssh/id_ed25519.pub" ]]; then

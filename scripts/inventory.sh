@@ -111,6 +111,7 @@ collect() {
     have nix && nix --version 2>&1
     have port && echo "macports"
 
+    run "Zed extensions" ls "$HOME/Library/Application Support/Zed/extensions/installed"
     run "VS Code extensions" code --list-extensions
     run "Cursor extensions" cursor --list-extensions
 

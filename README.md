@@ -23,7 +23,7 @@ On a company-managed Mac use `PROFILE="work"`: it skips admin-only security sett
 | `--skip a,b` | skip these steps |
 | `--dry-run` | print profile and steps, run nothing |
 
-Steps: `xcode homebrew packages languages shell iterm editors firefox git ssh security macos dirs docker audit verify`
+Steps: `xcode homebrew packages languages shell ghostty editors firefox git ssh security macos dirs docker audit verify`
 
 ## What goes where
 
@@ -37,11 +37,11 @@ Steps: `xcode homebrew packages languages shell iterm editors firefox git ssh se
 | `dotfiles/ssh/config` | `~/.ssh/config` (only if missing) |
 | `config/firefox/user.js` | `user.js` in every Firefox profile (symlink): memory and privacy preferences |
 | `config/starship.toml` | `~/.config/starship.toml` (symlink) |
-| `config/iterm2-profile.json` | iTerm2 dynamic profile "Developer" (copy), set as default profile |
+| `dotfiles/ghostty/config.ghostty` | `~/.config/ghostty/config.ghostty` (symlink) |
 
 Because the dotfiles are symlinks, editing `~/.zshrc` edits the repo — commit it. Machine-specific settings go in `~/.zshrc.local`.
 
-**iTerm2:** change the Developer profile in `config/iterm2-profile.json` and rerun `./setup.sh --only iterm`. Changes made in iTerm2's Settings to a dynamic profile are discarded on reload; to experiment, duplicate it first. Don't delete iTerm2's own "Default" profile. If iTerm2 is open, the step can't set the default profile — quit it and rerun.
+**Ghostty:** edit `dotfiles/ghostty/config.ghostty` (or `~/.config/ghostty/config.ghostty`, the same file) and reload with Cmd+Shift+,. Ghostty also reads `~/Library/Application Support/com.mitchellh.ghostty/`, and settings there win: keep that folder free of config files.
 
 ## Development
 

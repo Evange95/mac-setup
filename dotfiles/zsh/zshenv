@@ -33,7 +33,7 @@ path=(
     $HOME/.cargo/bin                # rust/cargo (personal profile)
     $HOMEBREW_PREFIX/bin            # homebrew
     $HOMEBREW_PREFIX/sbin           # homebrew sbin
-    /Library/TeX/texbin             # MacTeX (personal profile)
+    /Library/TeX/texbin             # BasicTeX (personal profile)
     $path                           # system defaults
 )
 typeset -U path

@@ -132,17 +132,56 @@ _cask_apps() {
         | sed 's|.*/||'
 }
 
+# Bundle ids of apps that pkg casks install: a pkg cask has no app artifact, the id of the
+# app it would quit before uninstalling is what identifies it
+_cask_bundle_ids() {
+    have brew && have jq || return 0
+    brew info --cask --json=v2 --installed 2> /dev/null \
+        | jq -r '.casks[].artifacts[]? | .uninstall? // empty | .[] | .quit? // empty | if type == "string" then . else .[] end' 2> /dev/null
+}
+
 # Apps that came from neither Homebrew, the App Store nor Apple
 unmanaged_apps() {
-    local managed app name
+    local managed managed_ids app name bundle_id
     managed="$(_cask_apps)"
+    managed_ids="$(_cask_bundle_ids)"
     for app in "$APPS_DIR"/*.app "$HOME/Applications"/*.app; do
         [[ -d "$app" ]] || continue
         name="$(basename "$app")"
         [[ -d "$app/Contents/_MASReceipt" ]] && continue
         echo "$managed" | grep -qxF "$name" && continue
-        [[ "$(defaults read "$app/Contents/Info" CFBundleIdentifier 2> /dev/null)" == com.apple.* ]] && continue
+        bundle_id="$(defaults read "$app/Contents/Info" CFBundleIdentifier 2> /dev/null)"
+        [[ "$bundle_id" == com.apple.* ]] && continue
+        [[ -n "$bundle_id" ]] && echo "$managed_ids" | grep -qxF "$bundle_id" && continue
         echo "  $app"
+    done
+}
+
+# Prints the program a launchd job starts
+_job_program() {
+    /usr/libexec/PlistBuddy -c 'Print :Program' "$1" 2> /dev/null \
+        || /usr/libexec/PlistBuddy -c 'Print :ProgramArguments:0' "$1" 2> /dev/null
+}
+
+# Background jobs, flagging the ones whose program was uninstalled (launchd keeps retrying them,
+# and a daemon already running goes on from the deleted binary until it is booted out)
+background_jobs() {
+    local dir plist program domain
+    for dir in $LAUNCH_DIRS; do
+        [[ -d "$dir" ]] || continue
+        for plist in "$dir"/*.plist; do
+            [[ -f "$plist" ]] || continue
+            echo "  $plist"
+            program="$(_job_program "$plist")"
+            [[ "$program" == /* && ! -e "$program" ]] || continue
+            if [[ "$dir" == "$HOME"/* ]]; then
+                log_warning "Left behind ($program is gone). Remove: launchctl bootout gui/\$(id -u) '$plist'; rm '$plist'"
+            else
+                domain="system"
+                [[ "$dir" == */LaunchAgents ]] && domain="gui/\$(id -u)"
+                log_warning "Left behind ($program is gone). Remove: sudo launchctl bootout $domain '$plist'; sudo rm '$plist'"
+            fi
+        done
     done
 }
 
@@ -157,10 +196,7 @@ report_manual() {
 
     heading "Starts by itself (review in System Settings > General > Login Items & Extensions)"
     echo "  Login items: $(osascript -e 'tell application "System Events" to get the name of every login item' 2> /dev/null)"
-    local dir
-    for dir in "$HOME/Library/LaunchAgents" /Library/LaunchAgents /Library/LaunchDaemons; do
-        [[ -d "$dir" ]] && find "$dir" -name '*.plist' -maxdepth 1 2> /dev/null | sed 's/^/  /'
-    done
+    background_jobs
 }
 
 cleanup_logs() {
@@ -194,6 +230,7 @@ main() {
     local free_before
     free_before="$(df -h "$HOME" | awk 'NR == 2 { print $4 }')"
     load_session_env
+    LAUNCH_DIRS="${LAUNCH_DIRS:-$HOME/Library/LaunchAgents /Library/LaunchAgents /Library/LaunchDaemons}"
 
     cleanup_homebrew
     cleanup_toolchains

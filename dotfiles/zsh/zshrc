@@ -104,7 +104,7 @@ bindkey '\e\e' sudo-command-line
 
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
-export EDITOR="code --wait"
+export EDITOR="zed --wait"
 export VISUAL="$EDITOR"
 export DIRENV_LOG_FORMAT=""
 
@@ -260,14 +260,6 @@ source "$HOMEBREW_PREFIX/share/zsh-you-should-use/you-should-use.plugin.zsh"
 source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 # fast-syntax-highlighting MUST be the last plugin
 source "$HOMEBREW_PREFIX/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh"
-
-#===============================================================================
-# Shell Integration
-#===============================================================================
-
-if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
-    test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
-fi
 
 #===============================================================================
 # Starship Prompt (must be last)

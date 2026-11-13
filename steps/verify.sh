@@ -8,7 +8,7 @@ _tool_version() {
 }
 
 step_verify() {
-    local tools=(git mise node pnpm bun go golangci-lint python uv ruff docker delta starship zoxide code claude)
+    local tools=(git mise node pnpm bun go golangci-lint python uv ruff docker delta starship zoxide zed claude)
     [[ "$PROFILE" == "personal" ]] && tools+=(rustc xelatex latexmk)
 
     local cmd pass=0 fail=0

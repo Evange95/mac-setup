@@ -1,0 +1,23 @@
+# Ghostty — linked to ~/.config/ghostty/config.ghostty by ./setup.sh --only ghostty.
+# Only what differs from the defaults is set. All options: ghostty +show-config --default --docs
+# Reload without restarting: Cmd+Shift+,
+
+theme = Catppuccin Mocha
+
+# From the font-meslo-lg-nerd-font cask; Ghostty falls back to its built-in font if it is missing
+font-family = MesloLGS Nerd Font Mono
+font-size = 13
+adjust-cell-height = 10%
+
+cursor-style = block
+cursor-style-blink = false
+
+window-width = 120
+window-height = 35
+
+# Left Option is Meta (Alt+B/F/Backspace move and delete by word); right Option keeps
+# typing the keyboard layout's characters (@ # [ ] { } on an Italian layout)
+macos-option-as-alt = left
+
+# Cmd+Z undoes the last edit on the command line (readline/zle undo is Ctrl+_)
+keybind = cmd+z=text:\x1f
