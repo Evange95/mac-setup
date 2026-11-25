@@ -20,7 +20,7 @@
     navigate = true
     side-by-side = true
     line-numbers = true
-    syntax-theme = Catppuccin-Mocha
+    syntax-theme = Catppuccin Mocha
     dark = true
     file-decoration-style = blue ol
     file-style = bold yellow ul
